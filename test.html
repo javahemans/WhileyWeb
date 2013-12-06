@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Code Mirror in Action</title>
+<link rel="stylesheet" href="lib/codemirror.css">
+<script src="lib/codemirror.js"></script>
+<script src="src/whiley.js"></script>
+</head>
+<body>
+
+<h1>Code Mirror Test</h1>
+<textarea id="code">
+int f(int x) requires x >= 0:
+  return 1
+</textarea>
+
+<script>
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true,
+    mode: "javascript"
+});
+</script>
+
+</body>
+</html>
