@@ -7,6 +7,14 @@
 <script type="text/javascript" src="${ROOT_URL}/js/jquery.js"></script>
 <script src="lib/codemirror.js"></script>
 <script src="src/whiley.js"></script>
+
+<script type="text/javascript">
+function compile() {
+  var codeArea = document.getElementById("code")
+  alert(codeArea.value);
+}
+</script>
+
 </head>
 <body>
 <div id="container">
@@ -20,7 +28,7 @@ int f(int x) requires x >= 0:
   return 1
 </textarea>
 
-<button type="button">Compile</button>
+<button type="button" onClick="compile()">Compile</button>
 
 <script>
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
