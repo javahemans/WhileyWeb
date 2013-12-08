@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Code Mirror in Action</title>
+<title>Whiley on the Web!</title>
+<link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="lib/codemirror.css">
 <script src="lib/codemirror.js"></script>
 <script src="src/whiley.js"></script>
 </head>
 <body>
-
+<div id="container">
+<div id="header">
 <h1>Whiley Web</h1>
+</div>
+<div id="content">
+<p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 <textarea id="code">
 int f(int x) requires x >= 0:
   return 1
 </textarea>
+
+<button type="button">Compile</button>
 
 <script>
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
@@ -20,6 +27,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     mode: "javascript"
 });
 </script>
-
+</div>
+</div>
 </body>
 </html>
