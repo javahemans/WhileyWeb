@@ -5,10 +5,22 @@
  body { 
   margin: 0px;
   padding: 0px;
-  text-align: center;
   font-family: "helvetica"; 
-  background: #dddddd; 
+  background: #cccccc; 
  }  
+
+ #header {
+   width: 100%;
+   background: #dddddd; 
+   margin-bottom: 2em;
+ }
+
+ #menu {
+  margin: 0px auto;
+   padding: 0px;
+   width: 1024px;
+   text-align: left;   
+ }
 
  #container {
   margin: 0px auto;
