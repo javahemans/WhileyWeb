@@ -18,17 +18,20 @@ function compile() {
 </head>
 <body>
 <div id="container">
-<div id="header">
-<h1>Whiley Web</h1>
-</div>
+
 <div id="content">
+<section>
+<button type="button" onClick="compile()">New</button>
+<button type="button" onClick="compile()">Save</button>
+<button type="button" onClick="compile()">Compile</button>
+<button type="button" onClick="compile()">Run</button>
+</section>
+
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 <textarea id="code">
 int f(int x) requires x >= 0:
   return 1
 </textarea>
-
-<button type="button" onClick="compile()">Compile</button>
 
 <script>
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
