@@ -3,35 +3,28 @@
 <head>
 <title>Whiley on the Web!</title>
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="lib/codemirror.css">
+<link rel="stylesheet" href="css/codemirror.css">
 <script type="text/javascript" src="${ROOT_URL}/js/jquery.js"></script>
-<script src="lib/codemirror.js"></script>
+<script src="js/codemirror.js"></script>
 <script src="src/whiley.js"></script>
 
 <script type="text/javascript">
 function compile() {
-  var codeArea = document.getElementById("code")
-  alert(codeArea.value);
+  var codeArea = document.getElementById("code");
+  var request = { code: codeArea.value };
+  $.post("${ROOT_URL}/compiler",request,
+   function(response) {
+     alert(response);
+   });
 }
 </script>
 
 </head>
 <body>
 <div id="header">
-<div id="menu">
-Blah
-</div>
 </div>
 <div id="container">
-
 <div id="content">
-<section>
-<button type="button" onClick="compile()">New</button>
-<button type="button" onClick="compile()">Save</button>
-<button type="button" onClick="compile()">Compile</button>
-<button type="button" onClick="compile()">Run</button>
-</section>
-
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 <textarea id="code">
 int f(int x) requires x >= 0:
@@ -44,6 +37,10 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     mode: "javascript"
 });
 </script>
+  <section>
+<button type="button" onClick="compile()">Compile</button>
+<button type="button" onClick="run()">Run</button>
+</section>
 </div>
 </div>
 </body>

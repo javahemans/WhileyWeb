@@ -37,14 +37,10 @@ class Main(object):
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def view(self,year):
-        template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url,YEAR=year)        
-    view.exposed = True
-    
-    def data(self,year,table):
-        return json.dumps(load("data/" + year + "/" + table + ".dat"))
-    data.exposed = True
+    def compiler(self,code):
+        print "GOT HERE"
+        return "Hello World"
+    compiler.exposed = True
     
     # application root
     def index(self):
@@ -55,6 +51,12 @@ class Main(object):
 
 # Load a given file representing a database table.
 def load(filename):
+    f = open(filename,"r")
+    data = json.load(f)
+    f.close()
+    return data
+
+def save(filename):
     f = open(filename,"r")
     data = json.load(f)
     f.close()
