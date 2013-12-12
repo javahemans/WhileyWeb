@@ -12,7 +12,7 @@
 function compile() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
-  $.post("compiler",request,
+  $.post("${ROOT_URL}/compiler",request,
    function(response) {
      console.value = response;
    });
