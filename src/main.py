@@ -51,7 +51,7 @@ class Main(object):
     # application root
     def index(self):
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL="")
+        return template.render(ROOT_URL=self.root_url)
     index.exposed = True
     # exposed
 
