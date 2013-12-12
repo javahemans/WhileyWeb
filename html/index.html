@@ -4,7 +4,7 @@
 <title>Whiley on the Web!</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/codemirror.css">
-<script type="text/javascript" src="${ROOT_URL}/js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
 <script src="js/codemirror.js"></script>
 <script src="src/whiley.js"></script>
 
@@ -12,7 +12,7 @@
 function compile() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
-  $.post("${ROOT_URL}/compiler",request,
+  $.post("compiler",request,
    function(response) {
      console.value = response;
    });
