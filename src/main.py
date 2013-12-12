@@ -80,9 +80,8 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    proc = subprocess.Popen(["java","-jar",WYJC_JAR,"tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+    proc = subprocess.Popen(["java","-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     # return the output
     print "GOT OUTPUT: " + out
-    print "GOT ERROR: " + err
     return out
