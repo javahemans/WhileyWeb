@@ -2,7 +2,14 @@
 
 import os
 from cherrypy.lib.static import serve_file
+import subprocess
 import json
+
+# ============================================================
+# Whiley Compiler Config
+# ============================================================
+
+WYJC_JAR="lib/wyjc-all-v0.3.21.jar"
 
 # ============================================================
 # Mako Config
@@ -38,8 +45,7 @@ class Main(object):
     css.exposed = True
     
     def compiler(self,code):
-        print "GOT HERE"
-        return "Hello World"
+        return compile(code)
     compiler.exposed = True
     
     # application root
@@ -49,15 +55,33 @@ class Main(object):
     index.exposed = True
     # exposed
 
-# Load a given file representing a database table.
+# ============================================================
+# Compiler Interface
+# ============================================================
+    
+# Load a given JSON file from the filesystem
 def load(filename):
     f = open(filename,"r")
     data = json.load(f)
     f.close()
     return data
 
-def save(filename):
-    f = open(filename,"r")
-    data = json.load(f)
+# Save a given file to the filesystem
+def save(filename,data):
+    f = open(filename,"w")
+    f.write(data)
     f.close()
-    return data
+    return
+
+# Compile a snippet of Whiley code.  This is done by saving the file
+# to disk in a temporary location, compiling it using the Whiley2Java
+# Compiler and then returning the compilation output.
+def compile(code):
+    # save the file
+    save("tmp/tmp.whiley", code)
+    # run the compiler
+    proc = subprocess.Popen(["javac","-help"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    # return the output
+    print "GOT OUTPUT: " + out
+    return err
