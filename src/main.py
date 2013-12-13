@@ -89,7 +89,7 @@ def compile(code):
     proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     if err == None:
-        return "Compiled"
+        return out
     else:
         return err
 
