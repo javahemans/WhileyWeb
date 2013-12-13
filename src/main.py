@@ -86,10 +86,18 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    #proc = subprocess.Popen(["java","-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
-    #(out, err) = proc.communicate()
-    # exitCode = os.system("java )
+    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    (out, err) = proc.communicate()
+    if err == None:
+        return "Compiled"
+    else:
+        return err
+
+# Code for compiling via the os.system function call
+def compileWithSystem(code):
+    # save the file
+    save("tmp/tmp.whiley", code)
+    # run the compiler
     if os.EX_OK != os.system(JAVA_CMD + " -jar " + WYJC_JAR + " -verify tmp/tmp.whiley > tmp/tmp.out 2> tmp/tmp.err"):
         return load("tmp/tmp.err")
-    # return the output
     return "Compiled"
