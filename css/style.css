@@ -65,3 +65,12 @@
     margin: 1px;
     visibility:hidden;
 }
+
+/**
+ * The error marker is the CSS style for highlighting errors.
+ */
+.errorMarker {
+    font-weight: bold;
+    background-color: yellow;
+    text-decoration: underline;
+}

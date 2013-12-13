@@ -14,6 +14,7 @@ function compile() {
   var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/compiler",request, function(response) {
      $("#compiling").css("visibility", "hidden");
+     editor.markText({line: 1, ch: 1}, {line: 1, ch: 10},{className: "errorMarker"});
      console.value = response;
    });
   $("#compiling").css("visibility", "visible");
@@ -39,6 +40,7 @@ int abs(int x) ensures $ >= 0:
 </textarea>
   <script>
     var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    indentUnit: 4,
     lineNumbers: true,
     mode: "javascript"
     });
