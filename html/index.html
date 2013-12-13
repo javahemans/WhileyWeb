@@ -9,17 +9,36 @@
 <script src="src/whiley.js"></script>
 
 <script type="text/javascript">
+/**
+ * Clear all markers from the editor.  This is to prevent markers
+ * from a previous compilation from hanging around.
+ */
+function clearAllMarkers() {
+   var markers = editor.getAllMarks();
+   for(var i=0;i!=markers.length;++i) {
+      markers[i].clear();
+   }
+}
+
+/**
+ * Add an appropriate marker for a given JSON error object, as
+ * returned from the server.
+ */
+function markError(error) {
+  var start = {line: error.line-1, ch: error.start};
+  var end = {line: error.line-1, ch: error.end+1};
+  editor.markText(start,end,{className: "errorMarker", title: error.text});
+}
+
 function compile() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/compiler",request, function(response) {
+     clearAllMarkers();
      errors = $.parseJSON(response);
      $("#compiling").css("visibility", "hidden");
      for(var i=0;i!=errors.length;++i) {
-         var error = errors[i];
-         var start = {line: error.line-1, ch: error.start};
-         var end = {line: error.line-1, ch: error.end+1};
-         editor.markText(start,end,{className: "errorMarker"});
+         markError(errors[i]);         
      }
      console.value = response;
    });
