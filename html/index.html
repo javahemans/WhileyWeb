@@ -9,12 +9,41 @@
 <script src="src/whiley.js"></script>
 
 <script type="text/javascript">
+/**
+ * Clear all markers from the editor.  This is to prevent markers
+ * from a previous compilation from hanging around.
+ */
+function clearAllMarkers() {
+   var markers = editor.getAllMarks();
+   for(var i=0;i!=markers.length;++i) {
+      markers[i].clear();
+   }
+}
+
+/**
+ * Add an appropriate marker for a given JSON error object, as
+ * returned from the server.
+ */
+function markError(error) {
+  var start = {line: error.line-1, ch: error.start};
+  var end = {line: error.line-1, ch: error.end+1};
+  editor.markText(start,end,{className: "errorMarker",title:error.text});
+  editor.setGutterMarker(error.line-1,"errorGutter",document.getElementById("marker"));
+}
+
+/**
+ * Compile a given snippet of Whiley code.
+ */
 function compile() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/compiler",request, function(response) {
+     clearAllMarkers();
+     errors = $.parseJSON(response);
      $("#compiling").css("visibility", "hidden");
-     console.value = response;
+     for(var i=0;i!=errors.length;++i) {
+         markError(errors[i]);         
+     }
    });
   $("#compiling").css("visibility", "visible");
 }
@@ -39,13 +68,16 @@ int abs(int x) ensures $ >= 0:
 </textarea>
   <script>
     var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    indentUnit: 4,
     lineNumbers: true,
-    mode: "javascript"
+    gutters: ["CodeMirror-linenumbers","errorGutter"],
+    mode: "whiley"
     });
   </script>
   <button id="compile" type="button" onClick="compile()">Compile <img
   id="compiling" src="images/loading.gif"/></button>
   </section>
+<img id="marker" src="images/cross.png" width="10px"/>  
 <textarea id="console">
 </textarea>
 </div>

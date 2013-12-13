@@ -1,617 +1,354 @@
-// TODO actually recognize syntax of TypeScript constructs
+/**
+ * Link to the project's GitHub page:
+ * https://github.com/pickhardt/coffeescript-codemirror-mode
+ */
+CodeMirror.defineMode("whiley", function(conf) {
+  var ERRORCLASS = "error";
 
-CodeMirror.defineMode("javascript", function(config, parserConfig) {
-  var indentUnit = config.indentUnit;
-  var statementIndent = parserConfig.statementIndent;
-  var jsonMode = parserConfig.json;
-  var isTS = parserConfig.typescript;
-
-  // Tokenizer
-
-  var keywords = function(){
-    function kw(type) {return {type: type, style: "keyword"};}
-    var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c");
-    var operator = kw("operator"), atom = {type: "atom", style: "atom"};
-
-    var jsKeywords = {
-      "if": kw("if"), "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
-      "return": C, "break": C, "continue": C, "new": C, "delete": C, "throw": C,
-      "var": kw("var"), "const": kw("var"), "let": kw("var"),
-      "function": kw("function"), "catch": kw("catch"),
-      "for": kw("for"), "switch": kw("switch"), "case": kw("case"), "default": kw("default"),
-      "in": operator, "typeof": operator, "instanceof": operator,
-      "true": atom, "false": atom, "null": atom, "undefined": atom, "NaN": atom, "Infinity": atom,
-      "this": kw("this"), "module": kw("module"), "class": kw("class"), "super": kw("atom"),
-      "yield": C, "export": kw("export"), "import": kw("import"), "extends": C
-    };
-
-    // Extend the 'normal' keywords with the TypeScript language extensions
-    if (isTS) {
-      var type = {type: "variable", style: "variable-3"};
-      var tsKeywords = {
-        // object-like things
-        "interface": kw("interface"),
-        "extends": kw("extends"),
-        "constructor": kw("constructor"),
-
-        // scope modifiers
-        "public": kw("public"),
-        "private": kw("private"),
-        "protected": kw("protected"),
-        "static": kw("static"),
-
-        // types
-        "string": type, "number": type, "bool": type, "any": type
-      };
-
-      for (var attr in tsKeywords) {
-        jsKeywords[attr] = tsKeywords[attr];
-      }
-    }
-
-    return jsKeywords;
-  }();
-
-  var isOperatorChar = /[+\-*&%=<>!?|~^]/;
-
-  function nextUntilUnescaped(stream, end) {
-    var escaped = false, next;
-    while ((next = stream.next()) != null) {
-      if (next == end && !escaped)
-        return false;
-      escaped = !escaped && next == "\\";
-    }
-    return escaped;
+  function wordRegexp(words) {
+    return new RegExp("^((" + words.join(")|(") + "))\\b");
   }
 
-  // Used as scratch variables to communicate multiple values without
-  // consing up tons of objects.
-  var type, content;
-  function ret(tp, style, cont) {
-    type = tp; content = cont;
-    return style;
-  }
+  var operators = /^(?:->|=>|\+[+=]?|-[\-=]?|\*[\*=]?|\/[\/=]?|[=!]=|<[><]?=?|>>?=?|%=?|&=?|\|=?|\^=?|\~|!|\?)/;
+  var delimiters = /^(?:[()\[\]{},:`=;]|\.\.?\.?)/;
+  var identifiers = /^[_A-Za-z$][_A-Za-z$0-9]*/;
+  var properties = /^(@|this\.)[_A-Za-z$][_A-Za-z$0-9]*/;
+
+  var wordOperators = wordRegexp(["and", "or", "not",
+                                  "is", "isnt", "in",
+                                  "instanceof", "typeof"]);
+  var indentKeywords = ["for", "while", "loop", "if", "unless", "else",
+                        "switch", "try", "catch", "finally", "class"];
+  var commonKeywords = ["break", "by", "continue", "debugger", "delete",
+                        "do", "in", "of", "new", "return", "then",
+                        "this", "throw", "when", "until"];
+
+  var keywords = wordRegexp(indentKeywords.concat(commonKeywords));
+
+  indentKeywords = wordRegexp(indentKeywords);
+
+
+  var stringPrefixes = /^('{3}|\"{3}|['\"])/;
+  var regexPrefixes = /^(\/{3}|\/)/;
+  var commonConstants = ["Infinity", "NaN", "undefined", "null", "true", "false", "on", "off", "yes", "no"];
+  var constants = wordRegexp(commonConstants);
+
+  // Tokenizers
   function tokenBase(stream, state) {
-    var ch = stream.next();
-    if (ch == '"' || ch == "'") {
-      state.tokenize = tokenString(ch);
-      return state.tokenize(stream, state);
-    } else if (ch == "." && stream.match(/^\d+(?:[eE][+\-]?\d+)?/)) {
-      return ret("number", "number");
-    } else if (ch == "." && stream.match("..")) {
-      return ret("spread", "meta");
-    } else if (/[\[\]{}\(\),;\:\.]/.test(ch)) {
-      return ret(ch);
-    } else if (ch == "=" && stream.eat(">")) {
-      return ret("=>");
-    } else if (ch == "0" && stream.eat(/x/i)) {
-      stream.eatWhile(/[\da-f]/i);
-      return ret("number", "number");
-    } else if (/\d/.test(ch)) {
-      stream.match(/^\d*(?:\.\d*)?(?:[eE][+\-]?\d+)?/);
-      return ret("number", "number");
-    } else if (ch == "/") {
-      if (stream.eat("*")) {
-        state.tokenize = tokenComment;
-        return tokenComment(stream, state);
-      } else if (stream.eat("/")) {
-        stream.skipToEnd();
-        return ret("comment", "comment");
-      } else if (state.lastType == "operator" || state.lastType == "keyword c" ||
-               state.lastType == "sof" || /^[\[{}\(,;:]$/.test(state.lastType)) {
-        nextUntilUnescaped(stream, "/");
-        stream.eatWhile(/[gimy]/); // 'y' is "sticky" option in Mozilla
-        return ret("regexp", "string-2");
+    // Handle scope changes
+    if (stream.sol()) {
+      if (state.scope.align === null) state.scope.align = false;
+      var scopeOffset = state.scope.offset;
+      if (stream.eatSpace()) {
+        var lineOffset = stream.indentation();
+        if (lineOffset > scopeOffset && state.scope.type == "coffee") {
+          return "indent";
+        } else if (lineOffset < scopeOffset) {
+          return "dedent";
+        }
+        return null;
       } else {
-        stream.eatWhile(isOperatorChar);
-        return ret("operator", null, stream.current());
+        if (scopeOffset > 0) {
+          dedent(stream, state);
+        }
       }
-    } else if (ch == "`") {
-      state.tokenize = tokenQuasi;
-      return tokenQuasi(stream, state);
-    } else if (ch == "#") {
-      stream.skipToEnd();
-      return ret("error", "error");
-    } else if (isOperatorChar.test(ch)) {
-      stream.eatWhile(isOperatorChar);
-      return ret("operator", null, stream.current());
-    } else {
-      stream.eatWhile(/[\w\$_]/);
-      var word = stream.current(), known = keywords.propertyIsEnumerable(word) && keywords[word];
-      return (known && state.lastType != ".") ? ret(known.type, known.style, word) :
-                     ret("variable", "variable", word);
     }
+    if (stream.eatSpace()) {
+      return null;
+    }
+
+    var ch = stream.peek();
+
+    // Handle docco title comment (single line)
+    if (stream.match("####")) {
+      stream.skipToEnd();
+      return "comment";
+    }
+
+    // Handle multi line comments
+    if (stream.match("###")) {
+      state.tokenize = longComment;
+      return state.tokenize(stream, state);
+    }
+
+    // Single line comment
+    if (ch === "#") {
+      stream.skipToEnd();
+      return "comment";
+    }
+
+    // Handle number literals
+    if (stream.match(/^-?[0-9\.]/, false)) {
+      var floatLiteral = false;
+      // Floats
+      if (stream.match(/^-?\d*\.\d+(e[\+\-]?\d+)?/i)) {
+        floatLiteral = true;
+      }
+      if (stream.match(/^-?\d+\.\d*/)) {
+        floatLiteral = true;
+      }
+      if (stream.match(/^-?\.\d+/)) {
+        floatLiteral = true;
+      }
+
+      if (floatLiteral) {
+        // prevent from getting extra . on 1..
+        if (stream.peek() == "."){
+          stream.backUp(1);
+        }
+        return "number";
+      }
+      // Integers
+      var intLiteral = false;
+      // Hex
+      if (stream.match(/^-?0x[0-9a-f]+/i)) {
+        intLiteral = true;
+      }
+      // Decimal
+      if (stream.match(/^-?[1-9]\d*(e[\+\-]?\d+)?/)) {
+        intLiteral = true;
+      }
+      // Zero by itself with no other piece of number.
+      if (stream.match(/^-?0(?![\dx])/i)) {
+        intLiteral = true;
+      }
+      if (intLiteral) {
+        return "number";
+      }
+    }
+
+    // Handle strings
+    if (stream.match(stringPrefixes)) {
+      state.tokenize = tokenFactory(stream.current(), "string");
+      return state.tokenize(stream, state);
+    }
+    // Handle regex literals
+    if (stream.match(regexPrefixes)) {
+      if (stream.current() != "/" || stream.match(/^.*\//, false)) { // prevent highlight of division
+        state.tokenize = tokenFactory(stream.current(), "string-2");
+        return state.tokenize(stream, state);
+      } else {
+        stream.backUp(1);
+      }
+    }
+
+    // Handle operators and delimiters
+    if (stream.match(operators) || stream.match(wordOperators)) {
+      return "operator";
+    }
+    if (stream.match(delimiters)) {
+      return "punctuation";
+    }
+
+    if (stream.match(constants)) {
+      return "atom";
+    }
+
+    if (stream.match(keywords)) {
+      return "keyword";
+    }
+
+    if (stream.match(identifiers)) {
+      return "variable";
+    }
+
+    if (stream.match(properties)) {
+      return "property";
+    }
+
+    // Handle non-detected items
+    stream.next();
+    return ERRORCLASS;
   }
 
-  function tokenString(quote) {
+  function tokenFactory(delimiter, outclass) {
+    var singleline = delimiter.length == 1;
     return function(stream, state) {
-      if (!nextUntilUnescaped(stream, quote))
-        state.tokenize = tokenBase;
-      return ret("string", "string");
+      while (!stream.eol()) {
+        stream.eatWhile(/[^'"\/\\]/);
+        if (stream.eat("\\")) {
+          stream.next();
+          if (singleline && stream.eol()) {
+            return outclass;
+          }
+        } else if (stream.match(delimiter)) {
+          state.tokenize = tokenBase;
+          return outclass;
+        } else {
+          stream.eat(/['"\/]/);
+        }
+      }
+      if (singleline) {
+        if (conf.mode.singleLineStringErrors) {
+          outclass = ERRORCLASS;
+        } else {
+          state.tokenize = tokenBase;
+        }
+      }
+      return outclass;
     };
   }
 
-  function tokenComment(stream, state) {
-    var maybeEnd = false, ch;
-    while (ch = stream.next()) {
-      if (ch == "/" && maybeEnd) {
+  function longComment(stream, state) {
+    while (!stream.eol()) {
+      stream.eatWhile(/[^#]/);
+      if (stream.match("###")) {
         state.tokenize = tokenBase;
         break;
       }
-      maybeEnd = (ch == "*");
+      stream.eatWhile("#");
     }
-    return ret("comment", "comment");
+    return "comment";
   }
 
-  function tokenQuasi(stream, state) {
-    var escaped = false, next;
-    while ((next = stream.next()) != null) {
-      if (!escaped && (next == "`" || next == "$" && stream.eat("{"))) {
-        state.tokenize = tokenBase;
-        break;
-      }
-      escaped = !escaped && next == "\\";
-    }
-    return ret("quasi", "string-2", stream.current());
-  }
-
-  var brackets = "([{}])";
-  // This is a crude lookahead trick to try and notice that we're
-  // parsing the argument patterns for a fat-arrow function before we
-  // actually hit the arrow token. It only works if the arrow is on
-  // the same line as the arguments and there's no strange noise
-  // (comments) in between. Fallback is to only notice when we hit the
-  // arrow, and not declare the arguments as locals for the arrow
-  // body.
-  function findFatArrow(stream, state) {
-    if (state.fatArrowAt) state.fatArrowAt = null;
-    var arrow = stream.string.indexOf("=>", stream.start);
-    if (arrow < 0) return;
-
-    var depth = 0, sawSomething = false;
-    for (var pos = arrow - 1; pos >= 0; --pos) {
-      var ch = stream.string.charAt(pos);
-      var bracket = brackets.indexOf(ch);
-      if (bracket >= 0 && bracket < 3) {
-        if (!depth) { ++pos; break; }
-        if (--depth == 0) break;
-      } else if (bracket >= 3 && bracket < 6) {
-        ++depth;
-      } else if (/[$\w]/.test(ch)) {
-        sawSomething = true;
-      } else if (sawSomething && !depth) {
-        ++pos;
+  function indent(stream, state, type) {
+    type = type || "coffee";
+    var offset = 0, align = false, alignOffset = null;
+    for (var scope = state.scope; scope; scope = scope.prev) {
+      if (scope.type === "coffee") {
+        offset = scope.offset + conf.indentUnit;
         break;
       }
     }
-    if (sawSomething && !depth) state.fatArrowAt = pos;
-  }
-
-  // Parser
-
-  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, "regexp": true, "this": true};
-
-  function JSLexical(indented, column, type, align, prev, info) {
-    this.indented = indented;
-    this.column = column;
-    this.type = type;
-    this.prev = prev;
-    this.info = info;
-    if (align != null) this.align = align;
-  }
-
-  function inScope(state, varname) {
-    for (var v = state.localVars; v; v = v.next)
-      if (v.name == varname) return true;
-    for (var cx = state.context; cx; cx = cx.prev) {
-      for (var v = cx.vars; v; v = v.next)
-        if (v.name == varname) return true;
+    if (type !== "coffee") {
+      align = null;
+      alignOffset = stream.column() + stream.current().length;
+    } else if (state.scope.align) {
+      state.scope.align = false;
     }
+    state.scope = {
+      offset: offset,
+      type: type,
+      prev: state.scope,
+      align: align,
+      alignOffset: alignOffset
+    };
   }
 
-  function parseJS(state, style, type, content, stream) {
-    var cc = state.cc;
-    // Communicate our context to the combinators.
-    // (Less wasteful than consing up a hundred closures on every call.)
-    cx.state = state; cx.stream = stream; cx.marked = null, cx.cc = cc;
-
-    if (!state.lexical.hasOwnProperty("align"))
-      state.lexical.align = true;
-
-    while(true) {
-      var combinator = cc.length ? cc.pop() : jsonMode ? expression : statement;
-      if (combinator(type, content)) {
-        while(cc.length && cc[cc.length - 1].lex)
-          cc.pop()();
-        if (cx.marked) return cx.marked;
-        if (type == "variable" && inScope(state, content)) return "variable-2";
-        return style;
+  function dedent(stream, state) {
+    if (!state.scope.prev) return;
+    if (state.scope.type === "coffee") {
+      var _indent = stream.indentation();
+      var matched = false;
+      for (var scope = state.scope; scope; scope = scope.prev) {
+        if (_indent === scope.offset) {
+          matched = true;
+          break;
+        }
       }
-    }
-  }
-
-  // Combinator utils
-
-  var cx = {state: null, column: null, marked: null, cc: null};
-  function pass() {
-    for (var i = arguments.length - 1; i >= 0; i--) cx.cc.push(arguments[i]);
-  }
-  function cont() {
-    pass.apply(null, arguments);
-    return true;
-  }
-  function register(varname) {
-    function inList(list) {
-      for (var v = list; v; v = v.next)
-        if (v.name == varname) return true;
+      if (!matched) {
+        return true;
+      }
+      while (state.scope.prev && state.scope.offset !== _indent) {
+        state.scope = state.scope.prev;
+      }
+      return false;
+    } else {
+      state.scope = state.scope.prev;
       return false;
     }
-    var state = cx.state;
-    if (state.context) {
-      cx.marked = "def";
-      if (inList(state.localVars)) return;
-      state.localVars = {name: varname, next: state.localVars};
-    } else {
-      if (inList(state.globalVars)) return;
-      if (parserConfig.globalVars)
-        state.globalVars = {name: varname, next: state.globalVars};
-    }
   }
 
-  // Combinators
+  function tokenLexer(stream, state) {
+    var style = state.tokenize(stream, state);
+    var current = stream.current();
 
-  var defaultVars = {name: "this", next: {name: "arguments"}};
-  function pushcontext() {
-    cx.state.context = {prev: cx.state.context, vars: cx.state.localVars};
-    cx.state.localVars = defaultVars;
-  }
-  function popcontext() {
-    cx.state.localVars = cx.state.context.vars;
-    cx.state.context = cx.state.context.prev;
-  }
-  function pushlex(type, info) {
-    var result = function() {
-      var state = cx.state, indent = state.indented;
-      if (state.lexical.type == "stat") indent = state.lexical.indented;
-      state.lexical = new JSLexical(indent, cx.stream.column(), type, null, state.lexical, info);
-    };
-    result.lex = true;
-    return result;
-  }
-  function poplex() {
-    var state = cx.state;
-    if (state.lexical.prev) {
-      if (state.lexical.type == ")")
-        state.indented = state.lexical.indented;
-      state.lexical = state.lexical.prev;
-    }
-  }
-  poplex.lex = true;
-
-  function expect(wanted) {
-    return function(type) {
-      if (type == wanted) return cont();
-      else if (wanted == ";") return pass();
-      else return cont(arguments.callee);
-    };
-  }
-
-  function statement(type, value) {
-    if (type == "var") return cont(pushlex("vardef", value.length), vardef, expect(";"), poplex);
-    if (type == "keyword a") return cont(pushlex("form"), expression, statement, poplex);
-    if (type == "keyword b") return cont(pushlex("form"), statement, poplex);
-    if (type == "{") return cont(pushlex("}"), block, poplex);
-    if (type == ";") return cont();
-    if (type == "if") return cont(pushlex("form"), expression, statement, poplex, maybeelse);
-    if (type == "function") return cont(functiondef);
-    if (type == "for") return cont(pushlex("form"), forspec, poplex, statement, poplex);
-    if (type == "variable") return cont(pushlex("stat"), maybelabel);
-    if (type == "switch") return cont(pushlex("form"), expression, pushlex("}", "switch"), expect("{"),
-                                      block, poplex, poplex);
-    if (type == "case") return cont(expression, expect(":"));
-    if (type == "default") return cont(expect(":"));
-    if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
-                                     statement, poplex, popcontext);
-    if (type == "module") return cont(pushlex("form"), pushcontext, afterModule, popcontext, poplex);
-    if (type == "class") return cont(pushlex("form"), className, objlit, poplex);
-    if (type == "export") return cont(pushlex("form"), afterExport, poplex);
-    if (type == "import") return cont(pushlex("form"), afterImport, poplex);
-    return pass(pushlex("stat"), expression, expect(";"), poplex);
-  }
-  function expression(type) {
-    return expressionInner(type, false);
-  }
-  function expressionNoComma(type) {
-    return expressionInner(type, true);
-  }
-  function expressionInner(type, noComma) {
-    if (cx.state.fatArrowAt == cx.stream.start) {
-      var body = noComma ? arrowBodyNoComma : arrowBody;
-      if (type == "(") return cont(pushcontext, commasep(pattern, ")"), expect("=>"), body, popcontext);
-      else if (type == "variable") return pass(pushcontext, pattern, expect("=>"), body, popcontext);
-    }
-
-    var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
-    if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
-    if (type == "function") return cont(functiondef);
-    if (type == "keyword c") return cont(noComma ? maybeexpressionNoComma : maybeexpression);
-    if (type == "(") return cont(pushlex(")"), maybeexpression, comprehension, expect(")"), poplex, maybeop);
-    if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
-    if (type == "[") return cont(pushlex("]"), expressionNoComma, maybeArrayComprehension, poplex, maybeop);
-    if (type == "{") return cont(commasep(objprop, "}"), maybeop);
-    return cont();
-  }
-  function maybeexpression(type) {
-    if (type.match(/[;\}\)\],]/)) return pass();
-    return pass(expression);
-  }
-  function maybeexpressionNoComma(type) {
-    if (type.match(/[;\}\)\],]/)) return pass();
-    return pass(expressionNoComma);
-  }
-
-  function maybeoperatorComma(type, value) {
-    if (type == ",") return cont(expression);
-    return maybeoperatorNoComma(type, value, false);
-  }
-  function maybeoperatorNoComma(type, value, noComma) {
-    var me = noComma == false ? maybeoperatorComma : maybeoperatorNoComma;
-    var expr = noComma == false ? expression : expressionNoComma;
-    if (value == "=>") return cont(pushcontext, noComma ? arrowBodyNoComma : arrowBody, popcontext);
-    if (type == "operator") {
-      if (/\+\+|--/.test(value)) return cont(me);
-      if (value == "?") return cont(expression, expect(":"), expr);
-      return cont(expr);
-    }
-    if (type == "quasi") { cx.cc.push(me); return quasi(value); }
-    if (type == ";") return;
-    if (type == "(") return cont(commasep(expressionNoComma, ")", "call"), me);
-    if (type == ".") return cont(property, me);
-    if (type == "[") return cont(pushlex("]"), maybeexpression, expect("]"), poplex, me);
-  }
-  function quasi(value) {
-    if (!value) debugger;
-    if (value.slice(value.length - 2) != "${") return cont();
-    return cont(expression, continueQuasi);
-  }
-  function continueQuasi(type) {
-    if (type == "}") {
-      cx.marked = "string-2";
-      cx.state.tokenize = tokenQuasi;
-      return cont();
-    }
-  }
-  function arrowBody(type) {
-    findFatArrow(cx.stream, cx.state);
-    if (type == "{") return pass(statement);
-    return pass(expression);
-  }
-  function arrowBodyNoComma(type) {
-    findFatArrow(cx.stream, cx.state);
-    if (type == "{") return pass(statement);
-    return pass(expressionNoComma);
-  }
-  function maybelabel(type) {
-    if (type == ":") return cont(poplex, statement);
-    return pass(maybeoperatorComma, expect(";"), poplex);
-  }
-  function property(type) {
-    if (type == "variable") {cx.marked = "property"; return cont();}
-  }
-  function objprop(type, value) {
-    if (type == "variable") {
-      cx.marked = "property";
-      if (value == "get" || value == "set") return cont(getterSetter);
-    } else if (type == "number" || type == "string") {
-      cx.marked = type + " property";
-    } else if (type == "[") {
-      return cont(expression, expect("]"), afterprop);
-    }
-    if (atomicTypes.hasOwnProperty(type)) return cont(afterprop);
-  }
-  function getterSetter(type) {
-    if (type != "variable") return pass(afterprop);
-    cx.marked = "property";
-    return cont(functiondef);
-  }
-  function afterprop(type) {
-    if (type == ":") return cont(expressionNoComma);
-    if (type == "(") return pass(functiondef);
-  }
-  function commasep(what, end, info) {
-    function proceed(type) {
-      if (type == ",") {
-        var lex = cx.state.lexical;
-        if (lex.info == "call") lex.pos = (lex.pos || 0) + 1;
-        return cont(what, proceed);
+    // Handle "." connected identifiers
+    if (current === ".") {
+      style = state.tokenize(stream, state);
+      current = stream.current();
+      if (/^\.[\w$]+$/.test(current)) {
+        return "variable";
+      } else {
+        return ERRORCLASS;
       }
-      if (type == end) return cont();
-      return cont(expect(end));
     }
-    return function(type) {
-      if (type == end) return cont();
-      if (info === false) return pass(what, proceed);
-      return pass(pushlex(end, info), what, proceed, poplex);
-    };
-  }
-  function block(type) {
-    if (type == "}") return cont();
-    return pass(statement, block);
-  }
-  function maybetype(type) {
-    if (isTS && type == ":") return cont(typedef);
-  }
-  function typedef(type) {
-    if (type == "variable"){cx.marked = "variable-3"; return cont();}
-  }
-  function vardef() {
-    return pass(pattern, maybetype, maybeAssign, vardefCont);
-  }
-  function pattern(type, value) {
-    if (type == "variable") { register(value); return cont(); }
-    if (type == "[") return cont(commasep(pattern, "]"));
-    if (type == "{") return cont(commasep(proppattern, "}"));
-  }
-  function proppattern(type, value) {
-    if (type == "variable" && !cx.stream.match(/^\s*:/, false)) {
-      register(value);
-      return cont(maybeAssign);
+
+    // Handle scope changes.
+    if (current === "return") {
+      state.dedent += 1;
     }
-    if (type == "variable") cx.marked = "property";
-    return cont(expect(":"), pattern, maybeAssign);
-  }
-  function maybeAssign(_type, value) {
-    if (value == "=") return cont(expressionNoComma);
-  }
-  function vardefCont(type) {
-    if (type == ",") return cont(vardef);
-  }
-  function maybeelse(type, value) {
-    if (type == "keyword b" && value == "else") return cont(pushlex("form"), statement, poplex);
-  }
-  function forspec(type) {
-    if (type == "(") return cont(pushlex(")"), forspec1, expect(")"));
-  }
-  function forspec1(type) {
-    if (type == "var") return cont(vardef, expect(";"), forspec2);
-    if (type == ";") return cont(forspec2);
-    if (type == "variable") return cont(formaybeinof);
-    return pass(expression, expect(";"), forspec2);
-  }
-  function formaybeinof(_type, value) {
-    if (value == "in" || value == "of") { cx.marked = "keyword"; return cont(expression); }
-    return cont(maybeoperatorComma, forspec2);
-  }
-  function forspec2(type, value) {
-    if (type == ";") return cont(forspec3);
-    if (value == "in" || value == "of") { cx.marked = "keyword"; return cont(expression); }
-    return pass(expression, expect(";"), forspec3);
-  }
-  function forspec3(type) {
-    if (type != ")") cont(expression);
-  }
-  function functiondef(type, value) {
-    if (value == "*") {cx.marked = "keyword"; return cont(functiondef);}
-    if (type == "variable") {register(value); return cont(functiondef);}
-    if (type == "(") return cont(pushcontext, commasep(funarg, ")"), statement, popcontext);
-  }
-  function funarg(type) {
-    if (type == "spread") return cont(funarg);
-    return pass(pattern, maybetype);
-  }
-  function className(type, value) {
-    if (type == "variable") {register(value); return cont(classNameAfter);}
-  }
-  function classNameAfter(_type, value) {
-    if (value == "extends") return cont(expression);
-  }
-  function objlit(type) {
-    if (type == "{") return cont(commasep(objprop, "}"));
-  }
-  function afterModule(type, value) {
-    if (type == "string") return cont(statement);
-    if (type == "variable") { register(value); return cont(maybeFrom); }
-  }
-  function afterExport(_type, value) {
-    if (value == "*") { cx.marked = "keyword"; return cont(maybeFrom, expect(";")); }
-    if (value == "default") { cx.marked = "keyword"; return cont(expression, expect(";")); }
-    return pass(statement);
-  }
-  function afterImport(type) {
-    if (type == "string") return cont();
-    return pass(importSpec, maybeFrom);
-  }
-  function importSpec(type, value) {
-    if (type == "{") return cont(commasep(importSpec, "}"));
-    if (type == "variable") register(value);
-    return cont();
-  }
-  function maybeFrom(_type, value) {
-    if (value == "from") { cx.marked = "keyword"; return cont(expression); }
-  }
-  function maybeArrayComprehension(type) {
-    if (type == "for") return pass(comprehension);
-    if (type == ",") return cont(commasep(expressionNoComma, "]", false));
-    return pass(commasep(expressionNoComma, "]", false));
-  }
-  function comprehension(type) {
-    if (type == "for") return cont(forspec, comprehension);
-    if (type == "if") return cont(expression, comprehension);
+    if (((current === "->" || current === "=>") &&
+         !state.lambda &&
+         !stream.peek())
+        || style === "indent") {
+      indent(stream, state);
+    }
+    var delimiter_index = "[({".indexOf(current);
+    if (delimiter_index !== -1) {
+      indent(stream, state, "])}".slice(delimiter_index, delimiter_index+1));
+    }
+    if (indentKeywords.exec(current)){
+      indent(stream, state);
+    }
+    if (current == "then"){
+      dedent(stream, state);
+    }
+
+
+    if (style === "dedent") {
+      if (dedent(stream, state)) {
+        return ERRORCLASS;
+      }
+    }
+    delimiter_index = "])}".indexOf(current);
+    if (delimiter_index !== -1) {
+      while (state.scope.type == "coffee" && state.scope.prev)
+        state.scope = state.scope.prev;
+      if (state.scope.type == current)
+        state.scope = state.scope.prev;
+    }
+    if (state.dedent > 0 && stream.eol() && state.scope.type == "coffee") {
+      if (state.scope.prev) state.scope = state.scope.prev;
+      state.dedent -= 1;
+    }
+
+    return style;
   }
 
-  // Interface
-
-  return {
+  var external = {
     startState: function(basecolumn) {
-      var state = {
+      return {
         tokenize: tokenBase,
-        lastType: "sof",
-        cc: [],
-        lexical: new JSLexical((basecolumn || 0) - indentUnit, 0, "block", false),
-        localVars: parserConfig.localVars,
-        context: parserConfig.localVars && {vars: parserConfig.localVars},
-        indented: 0
+        scope: {offset:basecolumn || 0, type:"coffee", prev: null, align: false},
+        lastToken: null,
+        lambda: false,
+        dedent: 0
       };
-      if (parserConfig.globalVars) state.globalVars = parserConfig.globalVars;
-      return state;
     },
 
     token: function(stream, state) {
-      if (stream.sol()) {
-        if (!state.lexical.hasOwnProperty("align"))
-          state.lexical.align = false;
-        state.indented = stream.indentation();
-        findFatArrow(stream, state);
+      var fillAlign = state.scope.align === null && state.scope;
+      if (fillAlign && stream.sol()) fillAlign.align = false;
+
+      var style = tokenLexer(stream, state);
+      if (fillAlign && style && style != "comment") fillAlign.align = true;
+
+      state.lastToken = {style:style, content: stream.current()};
+
+      if (stream.eol() && stream.lambda) {
+        state.lambda = false;
       }
-      if (state.tokenize != tokenComment && stream.eatSpace()) return null;
-      var style = state.tokenize(stream, state);
-      if (type == "comment") return style;
-      state.lastType = type == "operator" && (content == "++" || content == "--") ? "incdec" : type;
-      return parseJS(state, style, type, content, stream);
+
+      return style;
     },
 
-    indent: function(state, textAfter) {
-      if (state.tokenize == tokenComment) return CodeMirror.Pass;
+    indent: function(state, text) {
       if (state.tokenize != tokenBase) return 0;
-      var firstChar = textAfter && textAfter.charAt(0), lexical = state.lexical;
-      // Kludge to prevent 'maybelse' from blocking lexical scope pops
-      for (var i = state.cc.length - 1; i >= 0; --i) {
-        var c = state.cc[i];
-        if (c == poplex) lexical = lexical.prev;
-        else if (c != maybeelse) break;
-      }
-      if (lexical.type == "stat" && firstChar == "}") lexical = lexical.prev;
-      if (statementIndent && lexical.type == ")" && lexical.prev.type == "stat")
-        lexical = lexical.prev;
-      var type = lexical.type, closing = firstChar == type;
-
-      if (type == "vardef") return lexical.indented + (state.lastType == "operator" || state.lastType == "," ? lexical.info + 1 : 0);
-      else if (type == "form" && firstChar == "{") return lexical.indented;
-      else if (type == "form") return lexical.indented + indentUnit;
-      else if (type == "stat")
-        return lexical.indented + (state.lastType == "operator" || state.lastType == "," ? statementIndent || indentUnit : 0);
-      else if (lexical.info == "switch" && !closing && parserConfig.doubleIndentSwitch != false)
-        return lexical.indented + (/^(?:case|default)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
-      else if (lexical.align) return lexical.column + (closing ? 0 : 1);
-      else return lexical.indented + (closing ? 0 : indentUnit);
+      var scope = state.scope;
+      var closer = text && "])}".indexOf(text.charAt(0)) > -1;
+      if (closer) while (scope.type == "coffee" && scope.prev) scope = scope.prev;
+      var closes = closer && scope.type === text.charAt(0);
+      if (scope.align)
+        return scope.alignOffset - (closes ? 1 : 0);
+      else
+        return (closes ? scope.prev : scope).offset;
     },
 
-    electricChars: ":{}",
-    blockCommentStart: jsonMode ? null : "/*",
-    blockCommentEnd: jsonMode ? null : "*/",
-    lineComment: jsonMode ? null : "//",
-    fold: "brace",
-
-    helperType: jsonMode ? "json" : "javascript",
-    jsonMode: jsonMode
+    lineComment: "#",
+    fold: "indent"
   };
+  return external;
 });
 
-CodeMirror.defineMIME("text/javascript", "javascript");
-CodeMirror.defineMIME("text/ecmascript", "javascript");
-CodeMirror.defineMIME("application/javascript", "javascript");
-CodeMirror.defineMIME("application/ecmascript", "javascript");
-CodeMirror.defineMIME("application/json", {name: "javascript", json: true});
-CodeMirror.defineMIME("application/x-json", {name: "javascript", json: true});
-CodeMirror.defineMIME("text/typescript", { name: "javascript", typescript: true });
-CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript: true });
+CodeMirror.defineMIME("text/x-coffeescript", "coffeescript");
