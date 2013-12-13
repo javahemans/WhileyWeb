@@ -83,5 +83,4 @@ def compile(code):
     proc = subprocess.Popen(["java","-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     # return the output
-    print "GOT OUTPUT: " + out
     return out
