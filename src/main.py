@@ -80,7 +80,7 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    proc = subprocess.Popen(["javac","-help"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["java","-help"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     # return the output
     print "GOT OUTPUT: " + out
