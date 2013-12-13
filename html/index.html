@@ -13,8 +13,14 @@ function compile() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/compiler",request, function(response) {
+     errors = $.parseJSON(response);
      $("#compiling").css("visibility", "hidden");
-     editor.markText({line: 1, ch: 1}, {line: 1, ch: 10},{className: "errorMarker"});
+     for(var i=0;i!=errors.length;++i) {
+         var error = errors[i];
+         var start = {line: error.line-1, ch: error.start};
+         var end = {line: error.line-1, ch: error.end+1};
+         editor.markText(start,end,{className: "errorMarker"});
+     }
      console.value = response;
    });
   $("#compiling").css("visibility", "visible");

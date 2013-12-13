@@ -104,8 +104,9 @@ def splitErrors(errors):
 def splitError(error):
     error = error.split(":")
     return {
-        "line": error[0],
-        "start": error[1],
-        "end": error[2],
-        "text": error[3]        
+        "filename": error[0],        
+        "line": error[1],
+        "start": error[2],
+        "end": error[3],
+        "text": error[4]        
     }
