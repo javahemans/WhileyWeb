@@ -4,17 +4,17 @@
 <title>Whiley on the Web!</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/codemirror.css">
-<script type="text/javascript" src="${ROOT_URL}/js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
 <script src="js/codemirror.js"></script>
 <script src="src/whiley.js"></script>
 
 <script type="text/javascript">
 function compile() {
-  var codeArea = document.getElementById("code");
-  var request = { code: codeArea.value };
+  var console = document.getElementById("console");
+  var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/compiler",request,
    function(response) {
-     alert(response);
+     console.value = response;
    });
 }
 </script>
@@ -26,21 +26,26 @@ function compile() {
 <div id="container">
 <div id="content">
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
-<textarea id="code">
-int f(int x) requires x >= 0:
-  return 1
-</textarea>
 
-<script>
-var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+<section>
+<textarea id="code">
+// The absolute function
+int abs(int x) ensures $ >= 0:
+    if x >= 0:
+        return x
+    else:
+        return -x
+</textarea>
+  <script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     mode: "javascript"
-});
-</script>
-  <section>
-<button type="button" onClick="compile()">Compile</button>
-<button type="button" onClick="run()">Run</button>
+    });
+  </script>
+  <button type="button" onClick="compile()">Compile</button>
 </section>
+<textarea id="console">
+</textarea>
 </div>
 </div>
 </body>

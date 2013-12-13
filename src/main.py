@@ -51,7 +51,7 @@ class Main(object):
     # application root
     def index(self):
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL="")
+        return template.render(ROOT_URL=self.root_url)
     index.exposed = True
     # exposed
 
@@ -80,8 +80,8 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    proc = subprocess.Popen(["java","-help"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(["java","-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     # return the output
     print "GOT OUTPUT: " + out
-    return err
+    return out
