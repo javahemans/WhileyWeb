@@ -15,7 +15,8 @@ WYJC_JAR="lib/wyjc-all-v0.3.21.jar"
 # Java Config
 # ============================================================
 
-JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
+#JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
+JAVA_CMD="java"
 
 # ============================================================
 # Mako Config
