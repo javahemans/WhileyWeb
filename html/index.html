@@ -27,9 +27,13 @@ function clearAllMarkers() {
 function markError(error) {
   var start = {line: error.line-1, ch: error.start};
   var end = {line: error.line-1, ch: error.end+1};
-  editor.markText(start,end,{className: "errorMarker", title: error.text});
+  editor.markText(start,end,{className: "errorMarker",title:error.text});
+  editor.setGutterMarker(error.line-1,"errorGutter",document.getElementById("marker"));
 }
 
+/**
+ * Compile a given snippet of Whiley code.
+ */
 function compile() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
@@ -40,7 +44,6 @@ function compile() {
      for(var i=0;i!=errors.length;++i) {
          markError(errors[i]);         
      }
-     console.value = response;
    });
   $("#compiling").css("visibility", "visible");
 }
@@ -67,12 +70,14 @@ int abs(int x) ensures $ >= 0:
     var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     indentUnit: 4,
     lineNumbers: true,
+    gutters: ["CodeMirror-linenumbers","errorGutter"],
     mode: "javascript"
     });
   </script>
   <button id="compile" type="button" onClick="compile()">Compile <img
   id="compiling" src="images/loading.gif"/></button>
   </section>
+<img id="marker" src="images/cross.png" width="10px"/>  
 <textarea id="console">
 </textarea>
 </div>
