@@ -12,6 +12,12 @@ import json
 WYJC_JAR="lib/wyjc-all-v0.3.21.jar"
 
 # ============================================================
+# Java Config
+# ============================================================
+
+JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
+
+# ============================================================
 # Mako Config
 # ============================================================
 
@@ -62,7 +68,7 @@ class Main(object):
 # Load a given JSON file from the filesystem
 def load(filename):
     f = open(filename,"r")
-    data = json.load(f)
+    data = f.read()
     f.close()
     return data
 
@@ -80,7 +86,10 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    proc = subprocess.Popen(["java","-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
-    (out, err) = proc.communicate()
+    #proc = subprocess.Popen(["java","-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    #(out, err) = proc.communicate()
+    # exitCode = os.system("java )
+    if os.EX_OK != os.system(JAVA_CMD + " -jar " + WYJC_JAR + " -verify tmp/tmp.whiley > tmp/tmp.out 2> tmp/tmp.err"):
+        return load("tmp/tmp.err")
     # return the output
-    return out
+    return "Compiled"
