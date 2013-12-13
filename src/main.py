@@ -9,7 +9,7 @@ import json
 # Whiley Compiler Config
 # ============================================================
 
-WYJC_JAR="lib/wyjc-all-v0.3.21.jar"
+WYJC_JAR="lib/wyjc-all-v0.3.22.jar"
 
 # ============================================================
 # Java Config
@@ -52,7 +52,7 @@ class Main(object):
     css.exposed = True
     
     def compiler(self,code):
-        return compile(code)
+        return json.dumps(compile(code))
     compiler.exposed = True
     
     # application root
@@ -87,18 +87,25 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-verify","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-verify","-brief","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     if err == None:
-        return out
+        return splitErrors(out)
     else:
-        return err
+        return splitErrors(err)
 
-# Code for compiling via the os.system function call
-def compileWithSystem(code):
-    # save the file
-    save("tmp/tmp.whiley", code)
-    # run the compiler
-    if os.EX_OK != os.system(JAVA_CMD + " -jar " + WYJC_JAR + " -verify tmp/tmp.whiley > tmp/tmp.out 2> tmp/tmp.err"):
-        return load("tmp/tmp.err")
-    return "Compiled"
+def splitErrors(errors):
+    r = []
+    for err in errors.split("\n"):
+        if err != "":
+            r.append(splitError(err))
+    return r
+
+def splitError(error):
+    error = error.split(":")
+    return {
+        "line": error[0],
+        "start": error[1],
+        "end": error[2],
+        "text": error[3]        
+    }
