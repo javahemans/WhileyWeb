@@ -106,12 +106,20 @@ CodeMirror.defineMode("whiley", function() {
      * tokenises a stream
      */
     return {
+	
+	/**
+	 * Initialise the state that's passed around with the lexer.
+	 */
 	startState: function() {
 	    return { 
 		blockComment: false 
 	    };
 	},
 
+	/**
+	 * Produce a token identifier from the current stream
+	 * position, and advance the stream passed it.
+	 */
 	token: function(stream,state) {
 	    if(state.blockComment || stream.match(/^\/\*/)) {
 		parseBlockComment(stream,state);
@@ -126,7 +134,7 @@ CodeMirror.defineMode("whiley", function() {
 	    } else if(stream.match(numbers)) {
 		return "number";
 	    } else if(stream.match(types)) {
-		return "type";
+		return "atom";
 	    } else if(stream.match(identifiers)) {
 		return "variable";
 	    } else {
