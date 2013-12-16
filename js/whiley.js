@@ -11,6 +11,17 @@ CodeMirror.defineMode("whiley", function() {
 	return new RegExp("^((" + words.join(")|(") + "))\\b");	
     }
 
+    function parseBlockComment(stream,state) {
+	var lookahead;
+	state.blockComment = true;
+	while (lookahead = stream.next()) {
+	    if(lookahead == "*" && stream.eat('/')) {
+		state.blockComment = false;
+	     	return;
+	    }
+	}
+    }
+
     /**
      * Identifiers are used for the names of methods, functions,
      * types, constants, variables, fields, etc
@@ -95,12 +106,21 @@ CodeMirror.defineMode("whiley", function() {
      * tokenises a stream
      */
     return {
-	token: function(stream) {
-	    if(stream.match(/^\/\//)) {
-		stream.skipToEnd();
+	startState: function() {
+	    return { 
+		blockComment: false 
+	    };
+	},
+
+	token: function(stream,state) {
+	    if(state.blockComment || stream.match(/^\/\*/)) {
+		parseBlockComment(stream,state);
 		return "comment";
+	    } else if(stream.match(/^\/\//)) {
+	    	stream.skipToEnd();
+	    	return "comment";
 	    } else if(stream.match(operators)) {
-		return "keyword";
+		return "operator";
 	    } else if(stream.match(keywords)) {
 		return "keyword";
 	    } else if(stream.match(numbers)) {
