@@ -36,6 +36,9 @@ CodeMirror.defineMode("whiley", function() {
 	"string"
     ]);
 
+    /**
+     * The list of operators used in Whiley
+     */
     var operators = /^(==|!=?|>=?|<=?|&&?|\|\|?|[+|-|*|%|\/])/;
 
     /**
