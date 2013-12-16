@@ -11,9 +11,31 @@ CodeMirror.defineMode("whiley", function() {
 	return new RegExp("^((" + words.join(")|(") + "))\\b");	
     }
 
-   // var ops = /^(+|-)/;
-    var identifiers = /^[A-Za-z_][A-Za-z0-9_]*/;   
- 
+    /**
+     * Identifiers are used for the names of methods, functions,
+     * types, constants, variables, fields, etc
+     */
+    var identifiers = /^\w[\w\d]*/;   
+
+    /**
+     * Numbers are either integers or decimals (for now).
+     */
+    var numbers = /^\d+(.\d+)?/;
+
+    /**
+     * Predefined types.
+     */
+    var types = regexp([
+	"void",
+	"any",	
+	"bool",
+	"byte",
+	"char",
+	"int",
+	"real",
+	"string"
+    ]);
+
     /**
      * The list of keywords in Whiley
      */ 
@@ -74,6 +96,10 @@ CodeMirror.defineMode("whiley", function() {
 		return "comment";
 	    } else if(stream.match(keywords)) {
 		return "keyword";
+	    } else if(stream.match(numbers)) {
+		return "number";
+	    } else if(stream.match(types)) {
+		return "type";
 	    } else if(stream.match(identifiers)) {
 		return "variable";
 	    } else {
