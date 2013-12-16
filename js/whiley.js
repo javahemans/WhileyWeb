@@ -36,6 +36,8 @@ CodeMirror.defineMode("whiley", function() {
 	"string"
     ]);
 
+    var operators = /^(==|!=?|>=?|<=?|&&?|\|\|?|[+|-|*|%|\/])/;
+
     /**
      * The list of keywords in Whiley
      */ 
@@ -94,6 +96,8 @@ CodeMirror.defineMode("whiley", function() {
 	    if(stream.match(/^\/\//)) {
 		stream.skipToEnd();
 		return "comment";
+	    } else if(stream.match(operators)) {
+		return "keyword";
 	    } else if(stream.match(keywords)) {
 		return "keyword";
 	    } else if(stream.match(numbers)) {
