@@ -69,8 +69,6 @@ CodeMirror.defineMode("whiley", function() {
 	"do",
 	"else",
 	"ensures",
-	"export",
-	"extern",
 	"false",
 	"for",
 	"from",
@@ -83,9 +81,6 @@ CodeMirror.defineMode("whiley", function() {
 	"no",
 	"null",
 	"package",
-	"public",
-	"protected",
-	"private",
 	"requires",
 	"return",
 	"switch",
@@ -100,7 +95,15 @@ CodeMirror.defineMode("whiley", function() {
 	"where",
 	"while"
     ]);
-    
+
+    var qualifiers = regexp([
+	"export",
+	"extern",
+	"public",
+	"protected",
+	"private"
+    ]);
+
     /**
      * The Whiley mode is an object with a single token function which
      * tokenises a stream
@@ -135,6 +138,8 @@ CodeMirror.defineMode("whiley", function() {
 		return "number";
 	    } else if(stream.match(types)) {
 		return "atom";
+	    } else if(stream.match(qualifiers)) {
+		return "qualifier";
 	    } else if(stream.match(identifiers)) {
 		return "variable";
 	    } else {

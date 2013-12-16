@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="css/codemirror.css">
 <script type="text/javascript" src="js/jquery.js"></script>
 <script src="js/codemirror.js"></script>
+<script src="js/matchbrackets.js"></script>
 <script src="js/whiley.js"></script>
 
 <script type="text/javascript">
@@ -73,7 +74,8 @@ int abs(int x) ensures $ >= 0:
     indentUnit: 4,
     lineNumbers: true,
     gutters: ["CodeMirror-linenumbers","errorGutter"],
-    mode: "whiley"
+    matchBrackets: true,
+    mode: "whiley"    
     });
   </script>
   <button id="compile" type="button" onClick="compile()">Compile <img
