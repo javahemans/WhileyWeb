@@ -1,9 +1,12 @@
 # -*-python-*-
 
 import os
-from cherrypy.lib.static import serve_file
+import shutil
+import tempfile
 import subprocess
 import json
+
+from cherrypy.lib.static import serve_file
 
 # ============================================================
 # Whiley Compiler Config
@@ -26,6 +29,11 @@ JAVA_CMD="java"
 from mako.template import Template
 from mako.lookup import TemplateLookup
 lookup = TemplateLookup(directories=['html'])
+
+# ============================================================
+# Application Config
+# ============================================================
+WORKING_DIR="data/"
 
 # ============================================================
 # Application Entry
@@ -53,7 +61,14 @@ class Main(object):
     css.exposed = True
     
     def compiler(self,code):
-        return json.dumps(compile(code))
+        # First, create working directory
+        dir = createWorkingDirectory()
+        # Second, compile the code
+        result = compile(code,dir)
+        # Third, delete working directory
+        shutil.rmtree(dir)
+        # Fouth, return result as JSON
+        return json.dumps(result)
     compiler.exposed = True
     
     # application root
@@ -84,17 +99,21 @@ def save(filename,data):
 # Compile a snippet of Whiley code.  This is done by saving the file
 # to disk in a temporary location, compiling it using the Whiley2Java
 # Compiler and then returning the compilation output.
-def compile(code):
+def compile(code,dir):
+    filename = dir + "/tmp.whiley"
     # save the file
-    save("tmp/tmp.whiley", code)
+    save(filename, code)
     # run the compiler
-    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-bp",WYRT_JAR,"-verify","-brief","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-bp",WYRT_JAR,"-verify","-brief",filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     if err == None:
         return splitErrors(out)
     else:
         return splitErrors(err)
 
+# Split errors output from WyC into a list of JSON records, each of
+# which includes the filename, the line number, the column start and
+# end, as well a the text of the error itself.
 def splitErrors(errors):
     r = []
     for err in errors.split("\n"):
@@ -111,3 +130,7 @@ def splitError(error):
         "end": error[3],
         "text": error[4]        
     }
+
+# Get the working directory for this request.
+def createWorkingDirectory():
+    return tempfile.mkdtemp(dir=WORKING_DIR)
