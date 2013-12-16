@@ -96,6 +96,9 @@ CodeMirror.defineMode("whiley", function() {
 	"while"
     ]);
 
+    /**
+     * The list of function, type or constant qualifiers.
+     */
     var qualifiers = regexp([
 	"export",
 	"extern",
@@ -115,7 +118,10 @@ CodeMirror.defineMode("whiley", function() {
 	 */
 	startState: function() {
 	    return { 
-		blockComment: false 
+		// Indicates whether parsing a block comment.
+		blockComment: false,
+		// Indicates the current indent level
+		indent: 0
 	    };
 	},
 
@@ -124,12 +130,19 @@ CodeMirror.defineMode("whiley", function() {
 	 * position, and advance the stream passed it.
 	 */
 	token: function(stream,state) {
+	    var start = stream.pos;
 	    if(state.blockComment || stream.match(/^\/\*/)) {
 		parseBlockComment(stream,state);
 		return "comment";
 	    } else if(stream.match(/^\/\//)) {
 	    	stream.skipToEnd();
 	    	return "comment";
+	    } else if(stream.sol() && stream.eatWhile(/^[ ]/)) {
+		state.indent = stream.pos - start;
+		return null;
+	    } else if(stream.eat(":")) {
+		state.indent += 4;
+		return "operator";
 	    } else if(stream.match(operators)) {
 		return "operator";
 	    } else if(stream.match(keywords)) {
@@ -143,9 +156,14 @@ CodeMirror.defineMode("whiley", function() {
 	    } else if(stream.match(identifiers)) {
 		return "variable";
 	    } else {
+		// everything else
 		stream.next();
 		return null;
 	    }
+	},
+
+	indent: function(state, textAfter) {
+	    return state.indent;
 	}
     };  
 });
