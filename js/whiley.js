@@ -130,16 +130,19 @@ CodeMirror.defineMode("whiley", function() {
 	 * position, and advance the stream passed it.
 	 */
 	token: function(stream,state) {
-	    var start = stream.pos;
+
+	    // First, determine the current line indentation.  This is
+	    // used by the indent() function to determine the right
+	    // amount of indentation for the next line.
+	    state.indent = stream.indentation();
+
+	    // Second, try all of the different lexer token kinds
 	    if(state.blockComment || stream.match(/^\/\*/)) {
 		parseBlockComment(stream,state);
 		return "comment";
 	    } else if(stream.match(/^\/\//)) {
 	    	stream.skipToEnd();
 	    	return "comment";
-	    } else if(stream.sol() && stream.eatWhile(/^[ ]/)) {
-		state.indent = stream.pos - start;
-		return null;
 	    } else if(stream.eat(":")) {
 		state.indent += 4;
 		return "operator";
