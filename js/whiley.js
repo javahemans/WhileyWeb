@@ -15,7 +15,7 @@ CodeMirror.defineMode("whiley", function() {
      * Identifiers are used for the names of methods, functions,
      * types, constants, variables, fields, etc
      */
-    var identifiers = /^\w[\w\d]*/;   
+    var identifiers = /^[a-zA-Z][\w]*/;   
 
     /**
      * Numbers are either integers or decimals (for now).
