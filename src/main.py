@@ -10,6 +10,7 @@ import json
 # ============================================================
 
 WYJC_JAR="lib/wyjc-all-v0.3.22.jar"
+WYRT_JAR="lib/wyrt-v0.3.22.jar"
 
 # ============================================================
 # Java Config
@@ -87,7 +88,7 @@ def compile(code):
     # save the file
     save("tmp/tmp.whiley", code)
     # run the compiler
-    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-verify","-brief","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-bp",WYRT_JAR,"-verify","-brief","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     if err == None:
         return splitErrors(out)

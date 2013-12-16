@@ -6,18 +6,20 @@
 <link rel="stylesheet" href="css/codemirror.css">
 <script type="text/javascript" src="js/jquery.js"></script>
 <script src="js/codemirror.js"></script>
-<script src="src/whiley.js"></script>
+<script src="js/whiley.js"></script>
 
 <script type="text/javascript">
 /**
- * Clear all markers from the editor.  This is to prevent markers
- * from a previous compilation from hanging around.
+ * Clear all markers (including those in the gutter) from the editor.
+ * This is to prevent markers from a previous compilation from hanging
+ * around.
  */
 function clearAllMarkers() {
    var markers = editor.getAllMarks();
    for(var i=0;i!=markers.length;++i) {
       markers[i].clear();
    }
+   editor.clearGutter("errorGutter");
 }
 
 /**
