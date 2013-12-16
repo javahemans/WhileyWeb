@@ -69,8 +69,6 @@ CodeMirror.defineMode("whiley", function() {
 	"do",
 	"else",
 	"ensures",
-	"export",
-	"extern",
 	"false",
 	"for",
 	"from",
@@ -83,9 +81,6 @@ CodeMirror.defineMode("whiley", function() {
 	"no",
 	"null",
 	"package",
-	"public",
-	"protected",
-	"private",
 	"requires",
 	"return",
 	"switch",
@@ -100,25 +95,57 @@ CodeMirror.defineMode("whiley", function() {
 	"where",
 	"while"
     ]);
-    
+
+    /**
+     * The list of function, type or constant qualifiers.
+     */
+    var qualifiers = regexp([
+	"export",
+	"extern",
+	"public",
+	"protected",
+	"private"
+    ]);
+
     /**
      * The Whiley mode is an object with a single token function which
      * tokenises a stream
      */
     return {
+	
+	/**
+	 * Initialise the state that's passed around with the lexer.
+	 */
 	startState: function() {
 	    return { 
-		blockComment: false 
+		// Indicates whether parsing a block comment.
+		blockComment: false,
+		// Indicates the current indent level
+		indent: 0
 	    };
 	},
 
+	/**
+	 * Produce a token identifier from the current stream
+	 * position, and advance the stream passed it.
+	 */
 	token: function(stream,state) {
+
+	    // First, determine the current line indentation.  This is
+	    // used by the indent() function to determine the right
+	    // amount of indentation for the next line.
+	    state.indent = stream.indentation();
+
+	    // Second, try all of the different lexer token kinds
 	    if(state.blockComment || stream.match(/^\/\*/)) {
 		parseBlockComment(stream,state);
 		return "comment";
 	    } else if(stream.match(/^\/\//)) {
 	    	stream.skipToEnd();
 	    	return "comment";
+	    } else if(stream.eat(":")) {
+		state.indent += 4;
+		return "operator";
 	    } else if(stream.match(operators)) {
 		return "operator";
 	    } else if(stream.match(keywords)) {
@@ -126,13 +153,20 @@ CodeMirror.defineMode("whiley", function() {
 	    } else if(stream.match(numbers)) {
 		return "number";
 	    } else if(stream.match(types)) {
-		return "type";
+		return "atom";
+	    } else if(stream.match(qualifiers)) {
+		return "qualifier";
 	    } else if(stream.match(identifiers)) {
 		return "variable";
 	    } else {
+		// everything else
 		stream.next();
 		return null;
 	    }
+	},
+
+	indent: function(state, textAfter) {
+	    return state.indent;
 	}
     };  
 });
