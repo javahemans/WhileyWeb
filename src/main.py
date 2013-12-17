@@ -63,6 +63,7 @@ class Main(object):
     def compile(self,code,verify):
         # First, create working directory
         dir = createWorkingDirectory()
+        dir = WORKING_DIR + "/" + dir
         # Second, compile the code
         result = compile(code,verify,dir)
         # Third, delete working directory
@@ -75,7 +76,7 @@ class Main(object):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
-        save(dir + "/tmp.whiley", code)        
+        save(WORKING_DIR + "/" + dir + "/tmp.whiley", code)        
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -85,6 +86,7 @@ class Main(object):
     def run(self,code):
         # First, create working directory
         dir = createWorkingDirectory()
+        dir = WORKING_DIR + "/" + dir        
         # Second, compile the code and then run it
         result = compile(code,"false",dir)
         output = run(dir)
@@ -188,4 +190,6 @@ def splitError(error):
 
 # Get the working directory for this request.
 def createWorkingDirectory():
-    return tempfile.mkdtemp(dir=WORKING_DIR)
+    dir = tempfile.mkdtemp(prefix="",dir=WORKING_DIR)
+    tail,head = os.path.split(dir)
+    return head
