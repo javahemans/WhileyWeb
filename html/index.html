@@ -38,9 +38,8 @@ function markError(error) {
  * Compile a given snippet of Whiley code.
  */
 function compile() {
-  var console = document.getElementById("console");
   var request = { code: editor.getValue() };
-  $.post("${ROOT_URL}/compiler",request, function(response) {
+  $.post("${ROOT_URL}/compile",request, function(response) {
      clearAllMarkers();
      errors = $.parseJSON(response);
      $("#compiling").css("visibility", "hidden");
@@ -49,6 +48,28 @@ function compile() {
      }
    });
   $("#compiling").css("visibility", "visible");
+}
+
+/**
+ * Compile and run a given snippet of Whiley code.
+ */
+function compileAndRun() {
+  var console = document.getElementById("console");
+  var request = { code: editor.getValue() };
+  $.post("${ROOT_URL}/run",request, function(response) {
+     clearAllMarkers();
+     jr = $.parseJSON(response);
+     $("#running").css("visibility", "hidden");
+     for(var i=0;i!=jr.errors.length;++i) {
+         markError(jr.errors[i]);         
+     }
+     if(jr.errors.length == 0) {
+       console.value = jr.output;
+     } else {
+       console.value = jr.errors.length + " error(s).";
+     }
+   });
+  $("#running").css("visibility", "visible");
 }
 </script>
 
@@ -80,6 +101,9 @@ int abs(int x) ensures $ >= 0:
   </script>
   <button id="compile" type="button" onClick="compile()">Compile <img
   id="compiling" src="images/loading.gif"/></button>
+  <button id="compileAndRun" type="button"
+  onClick="compileAndRun()">Compile & Run<img
+  id="running" src="images/loading.gif"/></button>
   </section>
 <img id="marker" src="images/cross.png" width="10px"/>  
 <textarea id="console">

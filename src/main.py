@@ -60,7 +60,7 @@ class Main(object):
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def compiler(self,code):
+    def compile(self,code):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, compile the code
@@ -69,8 +69,23 @@ class Main(object):
         shutil.rmtree(dir)
         # Fouth, return result as JSON
         return json.dumps(result)
-    compiler.exposed = True
-    
+    compile.exposed = True
+
+    def run(self,code):
+        # First, create working directory
+        dir = createWorkingDirectory()
+        # Second, compile the code and then run it
+        result = compile(code,dir)
+        output = run(dir)
+        # Third, delete working directory
+        shutil.rmtree(dir)
+        # Fouth, return result as JSON
+        return json.dumps({
+            "errors": result,
+            "output": output
+            })
+    run.exposed = True        
+            
     # application root
     def index(self):
         template = lookup.get_template("index.html")
@@ -110,6 +125,12 @@ def compile(code,dir):
         return splitErrors(out)
     else:
         return splitErrors(err)
+
+def run(dir):
+    # run the JVM
+    proc = subprocess.Popen([JAVA_CMD,"-cp",WYJC_JAR + ":" + dir,"tmp"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    (out, err) = proc.communicate()
+    return out
 
 # Split errors output from WyC into a list of JSON records, each of
 # which includes the filename, the line number, the column start and

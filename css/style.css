@@ -60,7 +60,17 @@
     font-size: 11pt;
 }
 
+#compileAndRun {
+    font-size: 11pt;
+}
+
 #compiling {
+    vertical-align:middle;
+    margin: 1px;
+    visibility:hidden;
+}
+
+#running {
     vertical-align:middle;
     margin: 1px;
     visibility:hidden;
