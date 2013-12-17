@@ -39,16 +39,59 @@ function markError(error) {
  */
 function compile() {
   var console = document.getElementById("console");
-  var request = { code: editor.getValue() };
-  $.post("${ROOT_URL}/compiler",request, function(response) {
+  var verify = document.getElementById("verification");
+  var request = { id: "${SAVED_ID}", code: editor.getValue(), verify: verify.checked };
+  console.value = "";
+  $.post("${ROOT_URL}/compile",request, function(response) {
      clearAllMarkers();
-     errors = $.parseJSON(response);
-     $("#compiling").css("visibility", "hidden");
+     var errors = $.parseJSON(response);
+     $("#spinner").css("visibility", "hidden");
      for(var i=0;i!=errors.length;++i) {
          markError(errors[i]);         
      }
+     if(errors.length == 0) {
+       console.value = "Compiled OK.";
+     } else {
+       console.value = errors.length + " error(s).";
+     }
    });
-  $("#compiling").css("visibility", "visible");
+  $("#spinner").css("visibility", "visible");
+}
+
+/**
+ * Compile and run a given snippet of Whiley code.
+ */
+function run() {
+  var console = document.getElementById("console");
+  var request = { id: "${SAVED_ID}", code: editor.getValue() };
+  $.post("${ROOT_URL}/run",request, function(response) {
+     clearAllMarkers();
+     var jr = $.parseJSON(response);
+     $("#spinner").css("visibility", "hidden");
+     for(var i=0;i!=jr.errors.length;++i) {
+         markError(jr.errors[i]);         
+     }
+     if(jr.errors.length == 0) {
+       console.value = jr.output;
+     } else {
+       console.value = jr.errors.length + " error(s).";
+     }
+   });
+  $("#spinner").css("visibility", "visible");
+}
+
+/**
+ * Save a given snippet of Whiley code.
+ */
+function save() {
+  var console = document.getElementById("console");
+  var request = { code: editor.getValue() };
+  $.post("${ROOT_URL}/save" ,request, function(response) {
+     var jr = $.parseJSON(response);
+     $("#spinner").css("visibility", "hidden");
+     window.location.replace("saved?id=" + jr.id);     
+   });
+  $("#spinner").css("visibility", "visible");
 }
 </script>
 
@@ -60,14 +103,21 @@ function compile() {
 <div id="content">
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 
-<section>
 <textarea id="code">
-// The absolute function
-int abs(int x) ensures $ >= 0:
-    if x >= 0:
-        return x
+/** 
+ * The max() function, which returns the greater 
+ * of two integer arguments
+ */
+int max(int x, int y)
+// result must be one of the arguments
+ensures $ == x || $ == y,
+// result must be greater-or-equal than arguments
+ensures $ >= x && $ >= y:
+    //
+    if x > y:
+    	return x
     else:
-        return -x
+        return y
 </textarea>
   <script>
     var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
@@ -78,8 +128,13 @@ int abs(int x) ensures $ >= 0:
     mode: "whiley"    
     });
   </script>
-  <button id="compile" type="button" onClick="compile()">Compile <img
-  id="compiling" src="images/loading.gif"/></button>
+  <section id="toolbar">  
+  <button type="button" onClick="save()">Save</button>
+  <button type="button" onClick="compile()">Compile</button>
+  <button type="button" onClick="run()">Run</button>
+  <input id="verification" type="checkBox" unchecked>Enable
+  Verification</input>
+  <img id="spinner" src="images/loading.gif"/>  
   </section>
 <img id="marker" src="images/cross.png" width="10px"/>  
 <textarea id="console">

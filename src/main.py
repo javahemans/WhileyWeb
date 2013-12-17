@@ -1,9 +1,12 @@
 # -*-python-*-
 
 import os
-from cherrypy.lib.static import serve_file
+import shutil
+import tempfile
 import subprocess
 import json
+
+from cherrypy.lib.static import serve_file
 
 # ============================================================
 # Whiley Compiler Config
@@ -26,6 +29,11 @@ JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
 from mako.template import Template
 from mako.lookup import TemplateLookup
 lookup = TemplateLookup(directories=['html'])
+
+# ============================================================
+# Application Config
+# ============================================================
+WORKING_DIR="data/"
 
 # ============================================================
 # Application Entry
@@ -52,14 +60,62 @@ class Main(object):
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def compiler(self,code):
-        return json.dumps(compile(code))
-    compiler.exposed = True
+    def compile(self,id,code,verify):
+        if id == "":
+            # First, create working directory
+            dir = createWorkingDirectory()
+            dir = WORKING_DIR + "/" + dir
+        else:
+            dir = WORKING_DIR + "/" + id
+        # Second, compile the code
+        result = compile(code,verify,dir)
+        # Third, delete working directory
+        shutil.rmtree(dir)
+        # Fouth, return result as JSON
+        return json.dumps(result)
+    compile.exposed = True
+
+    def save(self,code):
+        # First, create working directory
+        dir = createWorkingDirectory()
+        # Second, save the file
+        save(WORKING_DIR + "/" + dir + "/tmp.whiley", code)        
+        # Fouth, return result as JSON
+        return json.dumps({
+            "id": dir
+            })
+    save.exposed = True        
+
+    def run(self,id,code):
+        if id == "":
+            # First, create working directory
+            dir = createWorkingDirectory()
+            dir = WORKING_DIR + "/" + dir
+            # Second, compile the code and then run it
+            result = compile(code,"false",dir)
+        else:
+            dir = WORKING_DIR + "/" + id
+            result = []
+        # Third, run the code
+        output = run(dir)
+        # Third, delete working directory
+        shutil.rmtree(dir)
+        # Fouth, return result as JSON
+        return json.dumps({
+            "errors": result,
+            "output": output
+            })
+    run.exposed = True        
+
+    def saved(self,id):
+        template = lookup.get_template("index.html")
+        return template.render(ROOT_URL=self.root_url,SAVED_ID=id)
+    saved.exposed = True
     
     # application root
     def index(self):
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url)
+        return template.render(ROOT_URL=self.root_url,SAVED_ID="")
     index.exposed = True
     # exposed
 
@@ -84,17 +140,45 @@ def save(filename,data):
 # Compile a snippet of Whiley code.  This is done by saving the file
 # to disk in a temporary location, compiling it using the Whiley2Java
 # Compiler and then returning the compilation output.
-def compile(code):
+def compile(code,verify,dir):
+    filename = dir + "/tmp.whiley"
+    # set required arguments
+    args = [
+        JAVA_CMD,
+        "-jar",
+        WYJC_JAR,
+        "-bootpath", WYRT_JAR, # set bootpath
+        "-whileydir", dir,     # set location of Whiley source file(s)
+        "-classdir", dir,      # set location to place class file(s)
+        "-brief"              # enable brief compiler output (easier to parse)
+    ]
+    # Configure optional arguments
+    if verify == "true":
+        args.append("-verify")
     # save the file
-    save("tmp/tmp.whiley", code)
+    save(filename, code)
+    args.append(filename)    
     # run the compiler
-    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-bp",WYRT_JAR,"-verify","-brief","tmp/tmp.whiley"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     if err == None:
         return splitErrors(out)
     else:
         return splitErrors(err)
 
+def run(dir):
+    # run the JVM
+    proc = subprocess.Popen([
+        JAVA_CMD,
+        "-cp",WYJC_JAR + ":" + dir,
+        "tmp"
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    (out, err) = proc.communicate()
+    return out
+
+# Split errors output from WyC into a list of JSON records, each of
+# which includes the filename, the line number, the column start and
+# end, as well a the text of the error itself.
 def splitErrors(errors):
     r = []
     for err in errors.split("\n"):
@@ -111,3 +195,9 @@ def splitError(error):
         "end": error[3],
         "text": error[4]        
     }
+
+# Get the working directory for this request.
+def createWorkingDirectory():
+    dir = tempfile.mkdtemp(prefix="",dir=WORKING_DIR)
+    tail,head = os.path.split(dir)
+    return head
