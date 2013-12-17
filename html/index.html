@@ -38,13 +38,21 @@ function markError(error) {
  * Compile a given snippet of Whiley code.
  */
 function compile() {
-  var request = { code: editor.getValue() };
+  var console = document.getElementById("console");
+  var verify = document.getElementById("verification");
+  var request = { code: editor.getValue(), verify: verify.checked };
+  console.value = "";
   $.post("${ROOT_URL}/compile",request, function(response) {
      clearAllMarkers();
      errors = $.parseJSON(response);
      $("#compiling").css("visibility", "hidden");
      for(var i=0;i!=errors.length;++i) {
          markError(errors[i]);         
+     }
+     if(errors.length == 0) {
+       console.value = "Compiled OK.";
+     } else {
+       console.value = errors.length + " error(s).";
      }
    });
   $("#compiling").css("visibility", "visible");
@@ -53,7 +61,7 @@ function compile() {
 /**
  * Compile and run a given snippet of Whiley code.
  */
-function compileAndRun() {
+function run() {
   var console = document.getElementById("console");
   var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/run",request, function(response) {
@@ -101,9 +109,10 @@ int abs(int x) ensures $ >= 0:
   </script>
   <button id="compile" type="button" onClick="compile()">Compile <img
   id="compiling" src="images/loading.gif"/></button>
-  <button id="compileAndRun" type="button"
-  onClick="compileAndRun()">Compile & Run<img
+  <button id="run" type="button"
+  onClick="run()">Run <img
   id="running" src="images/loading.gif"/></button>
+  <input id="verification" type="checkBox" unchecked/>Enable Verification
   </section>
 <img id="marker" src="images/cross.png" width="10px"/>  
 <textarea id="console">

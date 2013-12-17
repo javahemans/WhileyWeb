@@ -60,11 +60,11 @@ class Main(object):
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def compile(self,code):
+    def compile(self,code,verify):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, compile the code
-        result = compile(code,dir)
+        result = compile(code,verify,dir)
         # Third, delete working directory
         shutil.rmtree(dir)
         # Fouth, return result as JSON
@@ -75,7 +75,7 @@ class Main(object):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, compile the code and then run it
-        result = compile(code,dir)
+        result = compile(code,"false",dir)
         output = run(dir)
         # Third, delete working directory
         shutil.rmtree(dir)
@@ -114,12 +114,26 @@ def save(filename,data):
 # Compile a snippet of Whiley code.  This is done by saving the file
 # to disk in a temporary location, compiling it using the Whiley2Java
 # Compiler and then returning the compilation output.
-def compile(code,dir):
+def compile(code,verify,dir):
     filename = dir + "/tmp.whiley"
+    # set required arguments
+    args = [
+        JAVA_CMD,
+        "-jar",
+        WYJC_JAR,
+        "-bootpath", WYRT_JAR, # set bootpath
+        "-whileydir", dir,     # set location of Whiley source file(s)
+        "-classdir", dir,      # set location to place class file(s)
+        "-brief"              # enable brief compiler output (easier to parse)
+    ]
+    # Configure optional arguments
+    if verify == "true":
+        args.append("-verify")
     # save the file
     save(filename, code)
+    args.append(filename)    
     # run the compiler
-    proc = subprocess.Popen([JAVA_CMD,"-jar",WYJC_JAR,"-bp",WYRT_JAR,"-verify","-brief",filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     if err == None:
         return splitErrors(out)
@@ -128,7 +142,11 @@ def compile(code,dir):
 
 def run(dir):
     # run the JVM
-    proc = subprocess.Popen([JAVA_CMD,"-cp",WYJC_JAR + ":" + dir,"tmp"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+    proc = subprocess.Popen([
+        JAVA_CMD,
+        "-cp",WYJC_JAR + ":" + dir,
+        "tmp"
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
     return out
 
