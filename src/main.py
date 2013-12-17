@@ -60,10 +60,13 @@ class Main(object):
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def compile(self,code,verify):
-        # First, create working directory
-        dir = createWorkingDirectory()
-        dir = WORKING_DIR + "/" + dir
+    def compile(self,id,code,verify):
+        if id == "":
+            # First, create working directory
+            dir = createWorkingDirectory()
+            dir = WORKING_DIR + "/" + dir
+        else:
+            dir = WORKING_DIR + "/" + id
         # Second, compile the code
         result = compile(code,verify,dir)
         # Third, delete working directory
@@ -83,12 +86,17 @@ class Main(object):
             })
     save.exposed = True        
 
-    def run(self,code):
-        # First, create working directory
-        dir = createWorkingDirectory()
-        dir = WORKING_DIR + "/" + dir        
-        # Second, compile the code and then run it
-        result = compile(code,"false",dir)
+    def run(self,id,code):
+        if id == "":
+            # First, create working directory
+            dir = createWorkingDirectory()
+            dir = WORKING_DIR + "/" + dir
+            # Second, compile the code and then run it
+            result = compile(code,"false",dir)
+        else:
+            dir = WORKING_DIR + "/" + id
+            result = []
+        # Third, run the code
         output = run(dir)
         # Third, delete working directory
         shutil.rmtree(dir)
@@ -101,13 +109,13 @@ class Main(object):
 
     def saved(self,id):
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url)
+        return template.render(ROOT_URL=self.root_url,SAVED_ID=id)
     saved.exposed = True
     
     # application root
     def index(self):
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url)
+        return template.render(ROOT_URL=self.root_url,SAVED_ID="")
     index.exposed = True
     # exposed
 
