@@ -44,8 +44,8 @@ function compile() {
   console.value = "";
   $.post("${ROOT_URL}/compile",request, function(response) {
      clearAllMarkers();
-     errors = $.parseJSON(response);
-     $("#compiling").css("visibility", "hidden");
+     var errors = $.parseJSON(response);
+     $("#spinner").css("visibility", "hidden");
      for(var i=0;i!=errors.length;++i) {
          markError(errors[i]);         
      }
@@ -55,7 +55,7 @@ function compile() {
        console.value = errors.length + " error(s).";
      }
    });
-  $("#compiling").css("visibility", "visible");
+  $("#spinner").css("visibility", "visible");
 }
 
 /**
@@ -66,8 +66,8 @@ function run() {
   var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/run",request, function(response) {
      clearAllMarkers();
-     jr = $.parseJSON(response);
-     $("#running").css("visibility", "hidden");
+     var jr = $.parseJSON(response);
+     $("#spinner").css("visibility", "hidden");
      for(var i=0;i!=jr.errors.length;++i) {
          markError(jr.errors[i]);         
      }
@@ -77,7 +77,21 @@ function run() {
        console.value = jr.errors.length + " error(s).";
      }
    });
-  $("#running").css("visibility", "visible");
+  $("#spinner").css("visibility", "visible");
+}
+
+/**
+ * Save a given snippet of Whiley code.
+ */
+function save() {
+  var console = document.getElementById("console");
+  var request = { code: editor.getValue() };
+  $.post("${ROOT_URL}/save" ,request, function(response) {
+     var jr = $.parseJSON(response);
+     $("#spinner").css("visibility", "hidden");
+     window.location.replace("saved?id=" + jr.id);     
+   });
+  $("#spinner").css("visibility", "visible");
 }
 </script>
 
@@ -89,7 +103,6 @@ function run() {
 <div id="content">
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 
-<section>
 <textarea id="code">
 /** 
  * The max() function, which returns the greater 
@@ -115,12 +128,13 @@ ensures $ >= x && $ >= y:
     mode: "whiley"    
     });
   </script>
-  <button id="compile" type="button" onClick="compile()">Compile <img
-  id="compiling" src="images/loading.gif"/></button>
-  <button id="run" type="button"
-  onClick="run()">Run <img
-  id="running" src="images/loading.gif"/></button>
-  <input id="verification" type="checkBox" unchecked/>Enable Verification
+  <section id="toolbar">  
+  <button type="button" onClick="save()">Save</button>
+  <button type="button" onClick="compile()">Compile</button>
+  <button type="button" onClick="run()">Run</button>
+  <input id="verification" type="checkBox" unchecked>Enable
+  Verification</input>
+  <img id="spinner" src="images/loading.gif"/>  
   </section>
 <img id="marker" src="images/cross.png" width="10px"/>  
 <textarea id="console">

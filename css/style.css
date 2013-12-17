@@ -56,22 +56,12 @@
      margin: 20px 0px 0px 0px;
 }
 
-#compile {
+#toolbar button {
     font-size: 11pt;
 }
 
-#run {
-    font-size: 11pt;
-}
-
-#compiling {
-    vertical-align:middle;
-    margin: 1px;
-    visibility:hidden;
-}
-
-#running {
-    vertical-align:middle;
+#toolbar #spinner {
+    vertical-align: middle;
     margin: 1px;
     visibility:hidden;
 }

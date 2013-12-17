@@ -71,6 +71,17 @@ class Main(object):
         return json.dumps(result)
     compile.exposed = True
 
+    def save(self,code):
+        # First, create working directory
+        dir = createWorkingDirectory()
+        # Second, save the file
+        save(dir + "/tmp.whiley", code)        
+        # Fouth, return result as JSON
+        return json.dumps({
+            "id": dir
+            })
+    save.exposed = True        
+
     def run(self,code):
         # First, create working directory
         dir = createWorkingDirectory()
@@ -85,7 +96,12 @@ class Main(object):
             "output": output
             })
     run.exposed = True        
-            
+
+    def saved(self,id):
+        template = lookup.get_template("index.html")
+        return template.render(ROOT_URL=self.root_url)
+    saved.exposed = True
+    
     # application root
     def index(self):
         template = lookup.get_template("index.html")
