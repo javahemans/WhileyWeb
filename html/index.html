@@ -89,7 +89,7 @@ function save() {
   $.post("${ROOT_URL}/save" ,request, function(response) {
      var jr = $.parseJSON(response);
      $("#spinner").css("visibility", "hidden");
-     window.location.replace("saved?id=" + jr.id);     
+     window.location.replace("?id=" + jr.id);     
    });
   $("#spinner").css("visibility", "visible");
 }

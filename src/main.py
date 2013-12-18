@@ -101,20 +101,17 @@ class Main(object):
             })
     run.exposed = True        
 
-    def saved(self,id):
-        # Load the file
-        code = load("data/" + id + "/tmp.whiley")
-        # Escape the code
-        code = cgi.escape(code)
-        # return it!
+    # application root
+    def index(self,id=None):
+        if id != None:
+            # Load the file
+            code = load("data/" + id + "/tmp.whiley")
+            # Escape the code
+            code = cgi.escape(code)           
+        else:
+            code = ""
         template = lookup.get_template("index.html")
         return template.render(ROOT_URL=self.root_url,CODE=code)
-    saved.exposed = True
-    
-    # application root
-    def index(self):
-        template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url,CODE="")
     index.exposed = True
     # exposed
 
