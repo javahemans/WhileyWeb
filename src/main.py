@@ -92,9 +92,9 @@ class Main(object):
         result = compile(code,"false",dir)
         # Third, run the code
         output = run(dir)
-        # Third, delete working directory
+        # Fourth, delete working directory
         shutil.rmtree(dir)
-        # Fouth, return result as JSON
+        # Fifth, return result as JSON
         return json.dumps({
             "errors": result,
             "output": output
