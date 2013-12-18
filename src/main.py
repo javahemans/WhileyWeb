@@ -13,7 +13,7 @@ from cherrypy.lib.static import serve_file
 # Whiley Compiler Config
 # ============================================================
 
-WYJC_JAR="lib/wyjc-all-v0.3.22.jar"
+WYJC_JAR="lib/wyjc-all-v0.3.22b.jar"
 WYRT_JAR="lib/wyrt-v0.3.22.jar"
 
 # ============================================================
@@ -93,7 +93,7 @@ class Main(object):
         # Third, run the code
         output = run(dir)
         # Third, delete working directory
-        shutil.rmtree(dir)
+        #shutil.rmtree(dir)
         # Fouth, return result as JSON
         return json.dumps({
             "errors": result,
