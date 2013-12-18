@@ -34,7 +34,7 @@ lookup = TemplateLookup(directories=['html'])
 # ============================================================
 # Application Config
 # ============================================================
-WORKING_DIR="data/"
+WORKING_DIR="data"
 
 # ============================================================
 # Application Entry
@@ -105,7 +105,7 @@ class Main(object):
     def index(self,id=None):
         if id != None:
             # Load the file
-            code = load("data/" + id + "/tmp.whiley")
+            code = load(WORKING_DIR + "/" + id + "/tmp.whiley")
             # Escape the code
             code = cgi.escape(code)           
         else:
