@@ -60,13 +60,10 @@ class Main(object):
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def compile(self,id,code,verify):
-        if id == "":
-            # First, create working directory
-            dir = createWorkingDirectory()
-            dir = WORKING_DIR + "/" + dir
-        else:
-            dir = WORKING_DIR + "/" + id
+    def compile(self,code,verify):
+        # First, create working directory
+        dir = createWorkingDirectory()
+        dir = WORKING_DIR + "/" + dir
         # Second, compile the code
         result = compile(code,verify,dir)
         # Third, delete working directory
@@ -86,16 +83,12 @@ class Main(object):
             })
     save.exposed = True        
 
-    def run(self,id,code):
-        if id == "":
-            # First, create working directory
-            dir = createWorkingDirectory()
-            dir = WORKING_DIR + "/" + dir
-            # Second, compile the code and then run it
-            result = compile(code,"false",dir)
-        else:
-            dir = WORKING_DIR + "/" + id
-            result = []
+    def run(self,code):
+        # First, create working directory
+        dir = createWorkingDirectory()
+        dir = WORKING_DIR + "/" + dir
+        # Second, compile the code and then run it
+        result = compile(code,"false",dir)
         # Third, run the code
         output = run(dir)
         # Third, delete working directory

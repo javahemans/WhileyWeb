@@ -40,7 +40,7 @@ function markError(error) {
 function compile() {
   var console = document.getElementById("console");
   var verify = document.getElementById("verification");
-  var request = { id: "${SAVED_ID}", code: editor.getValue(), verify: verify.checked };
+  var request = { code: editor.getValue(), verify: verify.checked };
   console.value = "";
   $.post("${ROOT_URL}/compile",request, function(response) {
      clearAllMarkers();
@@ -63,7 +63,7 @@ function compile() {
  */
 function run() {
   var console = document.getElementById("console");
-  var request = { id: "${SAVED_ID}", code: editor.getValue() };
+  var request = { code: editor.getValue() };
   $.post("${ROOT_URL}/run",request, function(response) {
      clearAllMarkers();
      var jr = $.parseJSON(response);
