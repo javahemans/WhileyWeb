@@ -93,7 +93,7 @@ class Main(object):
         # Third, run the code
         output = run(dir)
         # Third, delete working directory
-        #shutil.rmtree(dir)
+        shutil.rmtree(dir)
         # Fouth, return result as JSON
         return json.dumps({
             "errors": result,
