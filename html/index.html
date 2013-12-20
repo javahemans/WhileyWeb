@@ -44,15 +44,17 @@ function compile() {
   console.value = "";
   $.post("${ROOT_URL}/compile",request, function(response) {
      clearAllMarkers();
-     var errors = $.parseJSON(response);
      $("#spinner").css("visibility", "hidden");
-     for(var i=0;i!=errors.length;++i) {
-         markError(errors[i]);         
-     }
-     if(errors.length == 0) {
-       console.value = "Compiled OK.";
-     } else {
+     var errors = $.parseJSON(response);
+     if(typeof errors == 'string') {
+       console.value = errors;
+     } else if(errors.length > 0) {
+        for(var i=0;i!=errors.length;++i) {
+           markError(errors[i]);         
+        }
        console.value = errors.length + " error(s).";
+     } else {
+       console.value = "Compiled OK.";
      }
    });
   $("#spinner").css("visibility", "visible");
