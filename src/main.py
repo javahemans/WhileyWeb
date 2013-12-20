@@ -20,8 +20,7 @@ WYRT_JAR="lib/wyrt-v0.3.22.jar"
 # Java Config
 # ============================================================
 
-JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
-#JAVA_CMD="java"
+JAVA_CMD="java"
 
 # ============================================================
 # Mako Config
