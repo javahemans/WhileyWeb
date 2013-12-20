@@ -14,3 +14,5 @@ nat abs(int x):
 
 void ::main(System.Console console):
     console.out.println("abs(1) = " + abs(1))
+    console.out.println("abs(0) = " + abs(0))
+    console.out.println("abs(-1) = " + abs(-1))
