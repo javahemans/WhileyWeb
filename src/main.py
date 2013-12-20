@@ -137,10 +137,9 @@ def save(filename,data):
 # to disk in a temporary location, compiling it using the Whiley2Java
 # Compiler and then returning the compilation output.
 def compile(code,verify,dir):
-    try:
-        filename = dir + "/tmp.whiley"
-        # set required arguments
-        args = [
+    filename = dir + "/tmp.whiley"
+    # set required arguments
+    args = [
             JAVA_CMD,
             "-jar",
             WYJC_JAR,
@@ -149,21 +148,23 @@ def compile(code,verify,dir):
             "-classdir", dir,      # set location to place class file(s)
             "-brief"              # enable brief compiler output (easier to parse)
         ]
-        # Configure optional arguments
-        if verify == "true":
-            args.append("-verify")
-        # save the file
-        save(filename, code)
-        args.append(filename)    
-        # run the compiler
+    # Configure optional arguments
+    if verify == "true":
+        args.append("-verify")
+    # save the file
+    save(filename, code)
+    args.append(filename)
+    # run the compiler    
+    try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         (out, err) = proc.communicate()
         if err == None:
             return splitErrors(out)
         else:
             return splitErrors(err)
-    except err:
-        return "ERROR"
+    except Exception as ex:
+        # error, so return that
+        return str(ex)
 
 def run(dir):
     # run the JVM
