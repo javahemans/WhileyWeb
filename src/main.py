@@ -20,8 +20,8 @@ WYRT_JAR="lib/wyrt-v0.3.22.jar"
 # Java Config
 # ============================================================
 
-#JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
-JAVA_CMD="java"
+JAVA_CMD="/usr/pkg/java/sun-6/bin/java"
+#JAVA_CMD="java"
 
 # ============================================================
 # Mako Config
@@ -167,14 +167,18 @@ def compile(code,verify,dir):
         return str(ex)
 
 def run(dir):
-    # run the JVM
-    proc = subprocess.Popen([
-        JAVA_CMD,
-        "-cp",WYJC_JAR + ":" + dir,
-        "tmp"
-        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
-    (out, err) = proc.communicate()
-    return out
+    try:
+        # run the JVM
+        proc = subprocess.Popen([
+            JAVA_CMD,
+            "-cp",WYJC_JAR + ":" + dir,
+            "tmp"
+            ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+        (out, err) = proc.communicate()
+        return out
+    except Exception as ex:
+        # error, so return that
+        return str(ex)
 
 # Split errors output from WyC into a list of JSON records, each of
 # which includes the filename, the line number, the column start and
