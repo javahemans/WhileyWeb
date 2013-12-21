@@ -1,0 +1,6 @@
+*.pyc
+data/*
+!data/HelloWorld
+!data/abs
+!data/max
+!data/microwave
