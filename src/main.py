@@ -102,15 +102,22 @@ class Main(object):
 
     # application root
     def index(self,id=None):
+        error = ""
+        redirect = "NO"
         if id != None:
-            # Load the file
-            code = load(WORKING_DIR + "/" + id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)           
+            try:
+                # Load the file
+                code = load(WORKING_DIR + "/" + id + "/tmp.whiley")
+                # Escape the code
+                code = cgi.escape(code)
+            except Exception:
+                code = ""
+                error = "Invalid ID: %s" % id
+                redirect = "YES"
         else:
             code = ""
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url,CODE=code)
+        return template.render(ROOT_URL=self.root_url,CODE=code,ERROR=error,REDIRECT=redirect)
     index.exposed = True
     # exposed
 

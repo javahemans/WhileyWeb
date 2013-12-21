@@ -95,6 +95,19 @@ function save() {
    });
   $("#spinner").css("visibility", "visible");
 }
+
+// Run this code when the page has loaded.
+$(document).ready(function() {
+    // If there is an error, display the error message for 5 seconds.
+    if("${ERROR}" != "") {
+        $("#error").show().delay(5000).fadeOut(500, function() {
+            // If the user should be redirected to the main page (due to invalid ID for example), do so.
+            if("${REDIRECT}" == "YES") {
+                window.location.replace("${ROOT_URL}/");
+            }
+        });
+    }
+});
 </script>
 
 </head>
@@ -103,6 +116,7 @@ function save() {
 </div>
 <div id="container">
 <div id="content">
+<div id="error">${ERROR}</div>
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 
 <textarea id="code">
