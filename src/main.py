@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import subprocess
 import json
+import re
 
 from cherrypy.lib.static import serve_file
 
@@ -106,8 +107,10 @@ class Main(object):
         redirect = "NO"
         if id != None:
             try:
+                # Sanitize the ID.
+                safe_id = re.sub("[^a-zA-Z0-9-]+", "", id)
                 # Load the file
-                code = load(WORKING_DIR + "/" + id + "/tmp.whiley")
+                code = load(WORKING_DIR + "/" + safe_id + "/tmp.whiley")
                 # Escape the code
                 code = cgi.escape(code)
             except Exception:
