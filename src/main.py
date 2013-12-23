@@ -170,7 +170,7 @@ def compile(code,verify,dir):
             return splitErrors(err)
     except Exception as ex:
         # error, so return that
-        return str(ex)
+        return "Compile Error: " + str(ex)
 
 def run(dir):
     try:
@@ -184,7 +184,7 @@ def run(dir):
         return out
     except Exception as ex:
         # error, so return that
-        return str(ex)
+        return "Run Error: " + str(ex)
 
 # Split errors output from WyC into a list of JSON records, each of
 # which includes the filename, the line number, the column start and
