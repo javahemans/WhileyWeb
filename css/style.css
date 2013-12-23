@@ -41,6 +41,13 @@
      font-size: 11pt;
  } 
 
+ #error {
+     padding: 10px;
+     display: none;
+     background-color: #ffcccc;
+     border: 1px solid #660000;
+ }
+
 /* ====================================================== */
 /* Editor Settings */
 /* ====================================================== */

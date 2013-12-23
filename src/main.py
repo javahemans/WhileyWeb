@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import subprocess
 import json
+import re
 
 from cherrypy.lib.static import serve_file
 
@@ -101,16 +102,22 @@ class Main(object):
     run.exposed = True        
 
     # application root
-    def index(self,id=None):
-        if id != None:
+    def index(self,id="HelloWorld"):
+        error = ""
+        redirect = "NO"
+        try:
+            # Sanitize the ID.
+            safe_id = re.sub("[^a-zA-Z0-9-]+", "", id)
             # Load the file
-            code = load(WORKING_DIR + "/" + id + "/tmp.whiley")
+            code = load(WORKING_DIR + "/" + safe_id + "/tmp.whiley")
             # Escape the code
-            code = cgi.escape(code)           
-        else:
+            code = cgi.escape(code)
+        except Exception:
             code = ""
+            error = "Invalid ID: %s" % id
+            redirect = "YES"
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url,CODE=code)
+        return template.render(ROOT_URL=self.root_url,CODE=code,ERROR=error,REDIRECT=redirect)
     index.exposed = True
     # exposed
 
