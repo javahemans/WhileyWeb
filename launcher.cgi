@@ -26,5 +26,5 @@ config = {
         "request.show_mismatched_params": False
     }
 }
-cherrypy.quickstart(main.Main("http://localhost:8080","djp"), config=config)
+cherrypy.quickstart(main.Main("http://localhost:8080"), config=config)
 

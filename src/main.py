@@ -43,9 +43,8 @@ WORKING_DIR="data"
 # ============================================================
 
 class Main(object):
-    def __init__(self,root_url,username):
+    def __init__(self,root_url):
         self.root_url = root_url
-        self.username = username
     
     # gives access to images/
     def images(self, filename, *args, **kwargs):
