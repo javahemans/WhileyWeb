@@ -115,7 +115,7 @@ class Main(object):
         redirect = "NO"
         try:
             # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-]+", "", id)
+            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
             # Load the file
             code = load(WORKING_DIR + "/" + safe_id + "/tmp.whiley")
             # Escape the code
