@@ -22,7 +22,10 @@ function markError(error) {
     var start = {line: error.line-1, ch: error.start};
     var end = {line: error.line-1, ch: error.end+1};
     editor.markText(start,end,{className: "errorMarker",title:error.text});
-    editor.setGutterMarker(error.line-1,"errorGutter",document.getElementById("marker"));
+    var marker = document.createElement("img");
+    marker.src = "images/cross.png";
+    marker.width = 10;
+    editor.setGutterMarker(error.line-1,"errorGutter",marker);
 }
 
 /**
