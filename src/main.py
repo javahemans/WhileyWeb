@@ -9,6 +9,7 @@ import json
 import re
 
 from cherrypy.lib.static import serve_file
+from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
 
 # ============================================================
@@ -48,21 +49,25 @@ class Main(object):
     
     # gives access to images/
     def images(self, filename):
+        allow(["HEAD", "GET"])
         abspath = os.path.abspath("images/" + filename)
         return serve_file(abspath, "image/png")
     images.exposed = True
     
     def js(self, filename):
+        allow(["HEAD", "GET"])
         abspath = os.path.abspath("js/" + filename)
         return serve_file(abspath, "application/javascript")
     js.exposed = True
 
     def css(self, filename):
+        allow(["HEAD", "GET"])
         abspath = os.path.abspath("css/" + filename)
         return serve_file(abspath, "text/css")
     css.exposed = True
     
     def compile(self,code,verify):
+        allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
         dir = WORKING_DIR + "/" + dir
@@ -75,6 +80,7 @@ class Main(object):
     compile.exposed = True
 
     def save(self,code):
+        allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
@@ -86,6 +92,7 @@ class Main(object):
     save.exposed = True        
 
     def run(self,code):
+        allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
         dir = WORKING_DIR + "/" + dir
@@ -104,6 +111,7 @@ class Main(object):
 
     # application root
     def index(self,id="HelloWorld"):
+        allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
         try:
