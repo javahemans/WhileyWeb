@@ -9,6 +9,7 @@ import json
 import re
 
 from cherrypy.lib.static import serve_file
+from cherrypy import HTTPRedirect
 
 # ============================================================
 # Whiley Compiler Config
@@ -120,6 +121,11 @@ class Main(object):
         return template.render(ROOT_URL=self.root_url,CODE=code,ERROR=error,REDIRECT=redirect)
     index.exposed = True
     # exposed
+
+    # Everything else should redirect to the main page.
+    def default(self, *args, **kwargs):
+        raise HTTPRedirect("/")
+    default.exposed = True
 
 # ============================================================
 # Compiler Interface
