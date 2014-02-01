@@ -198,13 +198,22 @@ def splitErrors(errors):
 
 def splitError(error):
     error = error.split(":")
-    return {
-        "filename": error[0],        
-        "line": error[1],
-        "start": error[2],
-        "end": error[3],
-        "text": error[4]        
-    }
+    if len(error) == 5:
+        return {
+            "filename": error[0],
+            "line": error[1],
+            "start": error[2],
+            "end": error[3],
+            "text": error[4]
+        }
+    else:
+        return {
+            "filename": "",
+            "line": "",
+            "start": "",
+            "end": "",
+            "text": error
+        }
 
 # Get the working directory for this request.
 def createWorkingDirectory():
