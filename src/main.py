@@ -75,7 +75,13 @@ class Main(object):
         # Third, delete working directory
         shutil.rmtree(dir)
         # Fouth, return result as JSON
-        return json.dumps(result)
+        if type(result) == str:
+            response = {"result": "error", "error": str}
+        elif len(result) != 0:
+            response = {"result": "errors", "errors": result}
+        else:
+            response = {"result": "success"}
+        return json.dumps(response)
     compile.exposed = True
 
     def save(self, code, *args, **kwargs):
@@ -87,7 +93,7 @@ class Main(object):
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
-            })
+        })
     save.exposed = True
 
     def run(self, code, *args, **kwargs):
@@ -97,15 +103,19 @@ class Main(object):
         dir = WORKING_DIR + "/" + dir
         # Second, compile the code and then run it
         result = compile(code,"false",dir)
-        # Third, run the code
-        output = run(dir)
-        # Fourth, delete working directory
+        if type(result) == str:
+            response = {"result": "error", "error": str}
+        elif len(result) != 0:
+            response = {"result": "errors", "errors": result}
+        else:
+            response = {"result": "success"}
+            # Run the code if the compilation succeeded.
+            output = run(dir)
+            response["output"] = output
+        # Third, delete working directory
         shutil.rmtree(dir)
-        # Fifth, return result as JSON
-        return json.dumps({
-            "errors": result,
-            "output": output
-            })
+        # Fourth, return result as JSON
+        return json.dumps(response)
     run.exposed = True
 
     # application root

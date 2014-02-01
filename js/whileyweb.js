@@ -29,26 +29,49 @@ function markError(error) {
 }
 
 /**
+ * Add a new message to the message list above the console.
+ */
+function addMessage(message_class, message, callback) {
+    var message = $("<div class=\"" + message_class + "\">" + message + "</div>");
+    $("#messages").append(message);
+    message.fadeIn(500).delay(2000).fadeOut(500, function() {
+        message.remove();
+        if (callback !== undefined) {
+            callback();
+        }
+    });
+}
+
+/**
+ * Remove all messages from the message list above the console.
+ */
+function clearMessages() {
+    $("#messages").children().remove();
+}
+
+/**
  * Compile a given snippet of Whiley code.
  */
 function compile() {
     var console = document.getElementById("console");
     var verify = document.getElementById("verification");
     var request = { code: editor.getValue(), verify: verify.checked };
-    console.value = "";
     $.post(root_url + "/compile",request, function(response) {
+        clearMessages();
         clearAllMarkers();
+        console.value = "";
         $("#spinner").css("visibility", "hidden");
-        var errors = $.parseJSON(response);
-        if(typeof errors == 'string') {
-            console.value = errors;
-        } else if(errors.length > 0) {
+        var response = $.parseJSON(response);
+        if(response["result"] == "success") {
+            addMessage("success", "Compiled successfully.");
+        } else if(response["result"] == "errors") {
+            var errors = response["errors"];
             for(var i=0;i!=errors.length;++i) {
-               markError(errors[i]);         
+               markError(errors[i]);
             }
-            console.value = errors.length + " error(s).";
-        } else {
-            console.value = "Compiled OK.";
+            addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
+        } else if(response["result"] == "error") {
+            addMessage("error", response["error"]);
         }
     });
     $("#spinner").css("visibility", "visible");
@@ -61,16 +84,22 @@ function run() {
     var console = document.getElementById("console");
     var request = { code: editor.getValue() };
     $.post(root_url + "/run",request, function(response) {
+        clearMessages();
         clearAllMarkers();
-        var jr = $.parseJSON(response);
+        console.value = "";
         $("#spinner").css("visibility", "hidden");
-        for(var i=0;i!=jr.errors.length;++i) {
-            markError(jr.errors[i]);         
-        }
-        if(jr.errors.length == 0) {
-            console.value = jr.output;
-        } else {
-            console.value = jr.errors.length + " error(s).";
+        var response = $.parseJSON(response);
+        if(response["result"] == "success") {
+            addMessage("success", "Compiled successfully. Running...");
+            setTimeout(function() {console.value = response["output"];}, 500);
+        } else if(response["result"] == "errors") {
+            var errors = response["errors"];
+            for(var i=0;i!=errors.length;++i) {
+               markError(errors[i]);
+            }
+            addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
+        } else if(response["result"] == "error") {
+            addMessage("error", response["error"]);
         }
     });
     $("#spinner").css("visibility", "visible");
@@ -83,9 +112,12 @@ function save() {
     var console = document.getElementById("console");
     var request = { code: editor.getValue() };
     $.post(root_url + "/save" ,request, function(response) {
+        clearMessages();
         var jr = $.parseJSON(response);
         $("#spinner").css("visibility", "hidden");
-        window.location.replace("?id=" + jr.id);     
+        addMessage("success", "Saved program as " + jr.id + ".", function() {
+            window.location.replace("?id=" + jr.id);
+        });
     });
     $("#spinner").css("visibility", "visible");
 }
@@ -103,7 +135,9 @@ $(document).ready(function() {
 
     // If there is an error, display the error message for 5 seconds.
     if(error != "") {
-        $("#error").show().delay(5000).fadeOut(500, function() {
+        var error_message = $("<div class=\"error\">" + error + "</div>");
+        $("#content").prepend(error_message);
+        error_message.show().delay(5000).fadeOut(500, function() {
             // If the user should be redirected to the main page (due to invalid ID for example), do so.
             if(redirect == "YES") {
                 window.location.replace(root_url + "/");

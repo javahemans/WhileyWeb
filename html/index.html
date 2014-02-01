@@ -20,7 +20,6 @@ var redirect = "${REDIRECT}";
 </div>
 <div id="container">
 <div id="content">
-<div id="error">${ERROR}</div>
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 
 <textarea id="code">
@@ -36,7 +35,7 @@ ${CODE}</textarea>
   Verification</input>
   <img id="spinner" src="images/loading.gif"/>  
 </section>
-
+<div id="messages"></div>
 <textarea id="console">
 </textarea>
 
