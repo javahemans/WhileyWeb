@@ -48,25 +48,25 @@ class Main(object):
         self.username = username
     
     # gives access to images/
-    def images(self, filename):
+    def images(self, filename, *args, **kwargs):
         allow(["HEAD", "GET"])
         abspath = os.path.abspath("images/" + filename)
         return serve_file(abspath, "image/png")
     images.exposed = True
     
-    def js(self, filename):
+    def js(self, filename, *args, **kwargs):
         allow(["HEAD", "GET"])
         abspath = os.path.abspath("js/" + filename)
         return serve_file(abspath, "application/javascript")
     js.exposed = True
 
-    def css(self, filename):
+    def css(self, filename, *args, **kwargs):
         allow(["HEAD", "GET"])
         abspath = os.path.abspath("css/" + filename)
         return serve_file(abspath, "text/css")
     css.exposed = True
     
-    def compile(self,code,verify):
+    def compile(self, code, verify, *args, **kwargs):
         allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
@@ -79,7 +79,7 @@ class Main(object):
         return json.dumps(result)
     compile.exposed = True
 
-    def save(self,code):
+    def save(self, code, *args, **kwargs):
         allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
@@ -91,7 +91,7 @@ class Main(object):
             })
     save.exposed = True        
 
-    def run(self,code):
+    def run(self, code, *args, **kwargs):
         allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
@@ -110,7 +110,7 @@ class Main(object):
     run.exposed = True        
 
     # application root
-    def index(self,id="HelloWorld"):
+    def index(self, id="HelloWorld", *args, **kwargs):
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
