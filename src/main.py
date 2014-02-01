@@ -45,14 +45,14 @@ WORKING_DIR="data"
 class Main(object):
     def __init__(self,root_url):
         self.root_url = root_url
-    
+
     # gives access to images/
     def images(self, filename, *args, **kwargs):
         allow(["HEAD", "GET"])
         abspath = os.path.abspath("images/" + filename)
         return serve_file(abspath, "image/png")
     images.exposed = True
-    
+
     def js(self, filename, *args, **kwargs):
         allow(["HEAD", "GET"])
         abspath = os.path.abspath("js/" + filename)
@@ -64,7 +64,7 @@ class Main(object):
         abspath = os.path.abspath("css/" + filename)
         return serve_file(abspath, "text/css")
     css.exposed = True
-    
+
     def compile(self, code, verify, *args, **kwargs):
         allow(["HEAD", "POST"])
         # First, create working directory
@@ -83,12 +83,12 @@ class Main(object):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
-        save(WORKING_DIR + "/" + dir + "/tmp.whiley", code)        
+        save(WORKING_DIR + "/" + dir + "/tmp.whiley", code)
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
             })
-    save.exposed = True        
+    save.exposed = True
 
     def run(self, code, *args, **kwargs):
         allow(["HEAD", "POST"])
@@ -106,7 +106,7 @@ class Main(object):
             "errors": result,
             "output": output
             })
-    run.exposed = True        
+    run.exposed = True
 
     # application root
     def index(self, id="HelloWorld", *args, **kwargs):
@@ -137,7 +137,7 @@ class Main(object):
 # ============================================================
 # Compiler Interface
 # ============================================================
-    
+
 # Load a given JSON file from the filesystem
 def load(filename):
     f = open(filename,"r")
@@ -173,7 +173,7 @@ def compile(code,verify,dir):
     # save the file
     save(filename, code)
     args.append(filename)
-    # run the compiler    
+    # run the compiler
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         (out, err) = proc.communicate()
