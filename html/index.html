@@ -16,16 +16,12 @@ var redirect = "${REDIRECT}";
 <script type="text/javascript" src="js/whileyweb.js"></script>
 </head>
 <body>
-<div id="header">
-</div>
 <div id="container">
 <div id="content">
 <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
 
 <textarea id="code">
 ${CODE}</textarea>
-<script>
-</script>
 
 <section id="toolbar">  
   <button type="button" onClick="save()">Save</button>
@@ -36,7 +32,7 @@ ${CODE}</textarea>
   <img id="spinner" src="images/loading.gif"/>  
 </section>
 <div id="messages"></div>
-<textarea id="console">
+<textarea id="console" readonly="readonly">
 </textarea>
 
 </div>
