@@ -2,16 +2,16 @@
 /* Page Layout */
 /* ====================================================== */
 
-body { 
+body {
     margin: 0px;
     padding: 0px;
-    font-family: "helvetica"; 
-    background: #cccccc; 
-}  
+    font-family: "helvetica";
+    background: #cccccc;
+}
 
 #header {
     width: 100%;
-    background: #dddddd; 
+    background: #dddddd;
     margin-bottom: 2em;
 }
 
@@ -19,7 +19,7 @@ body {
     margin: 0px auto;
     padding: 0px;
     width: 1024px;
-    text-align: left;   
+    text-align: left;
 }
 
 #container {
@@ -28,26 +28,27 @@ body {
     width: 1024px;
     text-align: left;
     border: 1px solid black;
-    background: #ffffff; 
+    background: #ffffff;
     box-shadow: 2px 2px 5px 0 #000;
-} 
+}
 
 #content {
     padding: 1em;
     font-family: 'Pontano Sans', Verdana, Helvetica, sans-serif;
     font-size: 11pt;
-} 
+}
 
-.error {
+.message {
     padding: 10px;
     display: none;
+}
+
+.error {
     background-color: #ffcccc;
     border: 1px solid #660000;
 }
 
 .success {
-    padding: 10px;
-    display: none;
     background-color: #ccffcc;
     border: 1px solid #006600;
 }
@@ -59,17 +60,50 @@ body {
 /* ====================================================== */
 /* Editor Settings */
 /* ====================================================== */
- 
-#content h1 { 
-    margin: 0 0 20 0; 
-    font-size: 16pt; 
-    font-weight: normal; 
+
+#content h1 {
+    margin: 0 0 20 0;
+    font-size: 16pt;
+    font-weight: normal;
     color: #1b6987;
     border-bottom: 1px solid #ccc;
 }
 
 .CodeMirror {
     border: 1px solid #ddd;
+}
+
+#errors {
+    font-family: 'Pontano Sans', Verdana, Helvetica, sans-serif;
+    width: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    z-index: 100;
+    background-color: #ffeeee;
+    border-left: 1px solid #fdd;
+    padding: 0.5em;
+}
+
+#errors #title {
+    color: #900;
+    margin-bottom: 0.5em;
+}
+
+#errors .error {
+    font-size: 10pt;
+    border: none;
+    padding: 0.5em;
+    margin-bottom: 1px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+#errors .error:hover {
+    background-color: #ffbbbb;
+    white-space: normal;
 }
 
 #console {
@@ -98,9 +132,9 @@ body {
 }
 
 #toolbar #spinner {
+    display: none;
     vertical-align: middle;
     margin: 1px;
-    visibility:hidden;
 }
 
 /**
@@ -113,4 +147,4 @@ body {
 
 .errorGutter {
     width: 10px;
-} 
+}
