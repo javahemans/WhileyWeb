@@ -220,14 +220,14 @@ def splitErrors(errors):
     return r
 
 def splitError(error):
-    error = error.split(":")
-    if len(error) == 5:
+    parts = error.split(":", 4)
+    if len(parts) == 5:
         return {
-            "filename": error[0],
-            "line": error[1],
-            "start": error[2],
-            "end": error[3],
-            "text": error[4]
+            "filename": parts[0],
+            "line": parts[1],
+            "start": parts[2],
+            "end": parts[3],
+            "text": parts[4]
         }
     else:
         return {
