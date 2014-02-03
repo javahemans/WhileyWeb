@@ -1,160 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Whiley on the Web!</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/codemirror.css">
-<script type="text/javascript" src="js/jquery.js"></script>
-<script src="js/codemirror.js"></script>
-<script src="js/matchbrackets.js"></script>
-<script src="js/whiley.js"></script>
-
-<script type="text/javascript">
-/**
- * Clear all markers (including those in the gutter) from the editor.
- * This is to prevent markers from a previous compilation from hanging
- * around.
- */
-function clearAllMarkers() {
-   var markers = editor.getAllMarks();
-   for(var i=0;i!=markers.length;++i) {
-      markers[i].clear();
-   }
-   editor.clearGutter("errorGutter");
-}
-
-/**
- * Add an appropriate marker for a given JSON error object, as
- * returned from the server.
- */
-function markError(error) {
-  var start = {line: error.line-1, ch: error.start};
-  var end = {line: error.line-1, ch: error.end+1};
-  editor.markText(start,end,{className: "errorMarker",title:error.text});
-  editor.setGutterMarker(error.line-1,"errorGutter",document.getElementById("marker"));
-}
-
-/**
- * Compile a given snippet of Whiley code.
- */
-function compile() {
-  var console = document.getElementById("console");
-  var verify = document.getElementById("verification");
-  var request = { code: editor.getValue(), verify: verify.checked };
-  console.value = "";
-  $.post("${ROOT_URL}/compile",request, function(response) {
-     clearAllMarkers();
-     $("#spinner").css("visibility", "hidden");
-     var errors = $.parseJSON(response);
-     if(typeof errors == 'string') {
-       console.value = errors;
-     } else if(errors.length > 0) {
-        for(var i=0;i!=errors.length;++i) {
-           markError(errors[i]);         
-        }
-       console.value = errors.length + " error(s).";
-     } else {
-       console.value = "Compiled OK.";
-     }
-   });
-  $("#spinner").css("visibility", "visible");
-}
-
-/**
- * Compile and run a given snippet of Whiley code.
- */
-function run() {
-  var console = document.getElementById("console");
-  var request = { code: editor.getValue() };
-  $.post("${ROOT_URL}/run",request, function(response) {
-     clearAllMarkers();
-     var jr = $.parseJSON(response);
-     $("#spinner").css("visibility", "hidden");
-     for(var i=0;i!=jr.errors.length;++i) {
-         markError(jr.errors[i]);         
-     }
-     if(jr.errors.length == 0) {
-       console.value = jr.output;
-     } else {
-       console.value = jr.errors.length + " error(s).";
-     }
-   });
-  $("#spinner").css("visibility", "visible");
-}
-
-/**
- * Save a given snippet of Whiley code.
- */
-function save() {
-  var console = document.getElementById("console");
-  var request = { code: editor.getValue() };
-  $.post("${ROOT_URL}/save" ,request, function(response) {
-     var jr = $.parseJSON(response);
-     $("#spinner").css("visibility", "hidden");
-     window.location.replace("?id=" + jr.id);     
-   });
-  $("#spinner").css("visibility", "visible");
-}
-
-// Run this code when the page has loaded.
-$(document).ready(function() {
-    // If there is an error, display the error message for 5 seconds.
-    if("${ERROR}" != "") {
-        $("#error").show().delay(5000).fadeOut(500, function() {
-            // If the user should be redirected to the main page (due to invalid ID for example), do so.
-            if("${REDIRECT}" == "YES") {
-                window.location.replace("${ROOT_URL}/");
-            }
-        });
-    }
-});
-</script>
-
+    <title>Whiley on the Web!</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/codemirror.css">
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/codemirror.js"></script>
+    <script type="text/javascript" src="js/matchbrackets.js"></script>
+    <script type="text/javascript" src="js/whiley.js"></script>
+    <script type="text/javascript">
+        var root_url = "${ROOT_URL}";
+        var error = "${ERROR}";
+        var redirect = "${REDIRECT}";
+    </script>
+    <script type="text/javascript" src="js/whileyweb.js"></script>
 </head>
 <body>
-<div id="header">
-</div>
-<div id="container">
-<div id="content">
-<div id="error">${ERROR}</div>
-<p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
-
-<textarea id="code">
-${CODE}</textarea>
-<script>
-  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-  indentUnit: 4,
-  lineNumbers: true,
-  gutters: ["CodeMirror-linenumbers","errorGutter"],
-  matchBrackets: true,
-  mode: "whiley"    
-  });
-</script>
-
-<section id="toolbar">  
-  <button type="button" onClick="save()">Save</button>
-  <button type="button" onClick="compile()">Compile</button>
-  <button type="button" onClick="run()">Run</button>
-  <input id="verification" type="checkBox" checked>Enable
-  Verification</input>
-  <img id="spinner" src="images/loading.gif"/>  
-</section>
-
-<img id="marker" src="images/cross.png" width="10px"/>  
-
-<textarea id="console">
-</textarea>
-
-</div>
-</div>
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-5582165-5");
-pageTracker._trackPageview();
-} catch(err) {}</script>
+    <div id="container">
+        <div id="content">
+            <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
+            <textarea id="code">${CODE}</textarea>
+            <section id="toolbar">
+                <button type="button" onClick="save();">Save</button>
+                <button type="button" onClick="compile();">Compile</button>
+                <button type="button" onClick="run();">Run</button>
+                <input id="verification" type="checkBox" checked="checked">Enable Verification</input>
+                <img id="spinner" src="images/loading.gif" />
+            </section>
+            <div id="messages"></div>
+            <textarea id="console" readonly="readonly"></textarea>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-5582165-5");
+            pageTracker._trackPageview();
+        } catch(err) {}
+    </script>
 </body>
 </html>
