@@ -35,8 +35,14 @@ import main
 
 import wsgiref.handlers
 
+config = {
+    "/": {
+        "request.show_tracebacks": False,
+        "request.show_mismatched_params": False
+    }
+}
 def application(environ, start_response):
-    app = cherrypy.tree.mount(main.Main(ROOT_URL), ROOT_URL)
+    app = cherrypy.tree.mount(main.Main(ROOT_URL), ROOT_URL, config=config)
     return app(environ,start_response)
 
 if __name__ == '__main__':
