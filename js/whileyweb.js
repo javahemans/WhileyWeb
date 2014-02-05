@@ -182,6 +182,14 @@ $(document).ready(function() {
         matchBrackets: true,
         mode: "whiley"
     });
+	$(".CodeMirror").resizable({
+		resize: function() {
+			editor.setSize($(this).width(), $(this).height());
+		},
+		handles: "s",
+		cursor: "default",
+		minHeight: $(".CodeMirror").height()
+	});
 
     // If there is an error, display the error message for 5 seconds.
     if(error != "") {
