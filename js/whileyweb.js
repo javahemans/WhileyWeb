@@ -33,26 +33,24 @@ function showErrors(errors) {
     if(box_exists) {
         var error_box = $("#errors");
         error_box.children(".error").remove();
-	    var markers = editor.getAllMarks();
-    	for(var i=0;i!=markers.length;++i) {
-        	markers[i].clear();
-	    }
-    	editor.clearGutter("errorGutter");
+		clearErrors(false);
     } else {
         var error_box = $("<div id=\"errors\"><div id=\"title\">Errors</div></div>");
     }
     for(var i=0;i!=errors.length;++i) {
-        markError(errors[i], false, true);
-        var error = $("<div></div>");
-        error.text(errors[i].text);
-        error.addClass("error");
-        error.bind("mouseenter", {err: errors[i]}, function(event) {
+		var error = errors[i];
+        var message = $("<div></div>");
+        message.text(error.text);
+        message.addClass("error");
+        message.bind("mouseenter", {err: error}, function(event) {
             markError(event.data.err, true, false);
         });
-        error.bind("mouseleave", {err: errors[i]}, function(event) {
+        message.bind("mouseleave", {err: error}, function(event) {
             markError(event.data.err, false, false);
         });
-        error.appendTo(error_box);
+        message.appendTo(error_box);
+        markError(error, false, true);
+		editor.errors.push(message);
     }
     if(!box_exists) {
         error_box.prependTo(".CodeMirror");
@@ -93,18 +91,24 @@ function markError(error, highlight, gutter) {
  * This is to prevent markers from a previous compilation from hanging
  * around.
  */
-function clearErrors() {
-    $(".CodeMirror-scroll").width("100%");
+function clearErrors(hideErrorPanel) {
     var markers = editor.getAllMarks();
     for(var i=0;i!=markers.length;++i) {
         markers[i].clear();
     }
+	for(var i=0;i!=editor.errors.length;++i) {
+		editor.errors[i].unbind("mouseenter mouseleave");
+	}
+	editor.errors = [];
     editor.clearGutter("errorGutter");
-    $("#errors").animate({
-        width: "0"
-    }, 500, function() {
-        $("#errors").remove();
-    });
+	if(hideErrorPanel) {
+	    $(".CodeMirror-scroll").width("100%");
+    	$("#errors").animate({
+	        width: "0"
+    	}, 500, function() {
+	        $("#errors").remove();
+    	});
+	}
 }
 
 /**
@@ -120,14 +124,14 @@ function compile() {
         $("#spinner").hide();
         var response = $.parseJSON(response);
         if(response.result == "success") {
-            clearErrors();
+            clearErrors(true);
             addMessage("success", "Compiled successfully.");
         } else if(response.result == "errors") {
             var errors = response.errors;
             showErrors(errors);
             addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
         } else if(response.result == "error") {
-            clearErrors();
+            clearErrors(true);
             addMessage("error", response.error);
         }
     });
@@ -146,7 +150,7 @@ function run() {
         $("#spinner").hide();
         var response = $.parseJSON(response);
         if(response.result == "success") {
-            clearErrors();
+            clearErrors(true);
             addMessage("success", "Compiled successfully. Running...");
             setTimeout(function() {console.value = response.output;}, 500);
         } else if(response.result == "errors") {
@@ -154,7 +158,7 @@ function run() {
             showErrors(errors);
             addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
         } else if(response.result == "error") {
-            clearErrors();
+            clearErrors(true);
             addMessage("error", response.error);
         }
     });
@@ -187,6 +191,7 @@ $(document).ready(function() {
         matchBrackets: true,
         mode: "whiley"
     });
+	editor.errors = [];
 	$(".CodeMirror").resizable({
 		resize: function() {
 			editor.setSize($(this).width(), $(this).height());
