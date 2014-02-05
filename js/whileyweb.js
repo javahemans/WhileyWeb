@@ -37,18 +37,15 @@ function showErrors(errors) {
         var error_box = $("<div id=\"errors\"><div id=\"title\">Errors</div></div>");
     }
     for(var i=0;i!=errors.length;++i) {
+        markError(errors[i], false, true);
         var error = $("<div></div>");
         error.text(errors[i].text);
         error.addClass("error");
         error.bind("mouseenter", {err: errors[i]}, function(event) {
-            markError(event.data.err);
+            markError(event.data.err, true, false);
         });
-        error.bind("mouseleave", function(event) {
-            var markers = editor.getAllMarks();
-            for(var i=0;i!=markers.length;++i) {
-                markers[i].clear();
-            }
-            editor.clearGutter("errorGutter");
+        error.bind("mouseleave", {err: errors[i]}, function(event) {
+            markError(event.data.err, false, false);
         });
         error.appendTo(error_box);
     }
@@ -66,13 +63,17 @@ function showErrors(errors) {
  * Add an appropriate marker for a given JSON error object, as
  * returned from the server.
  */
-function markError(error) {
+function markError(error, highlight, gutter) {
+	if(error.mark) {
+		error.mark.clear();
+	}
     if(error.start != "" && error.end != "" && error.line != "") {
         var start = {line: error.line-1, ch: error.start};
         var end = {line: error.line-1, ch: error.end+1};
-        editor.markText(start, end, {className: "errorMarker", title: error.text});
+		var className = (highlight ? "errorMarkerHighlight" : "errorMarker");
+        error.mark = editor.markText(start, end, {className: className, title: error.text});
     }
-    if(error.line != "") {
+    if(gutter && error.line != "") {
         var marker = document.createElement("img");
         marker.src = "images/cross.png";
         marker.width = 10;
