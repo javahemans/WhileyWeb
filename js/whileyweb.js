@@ -33,6 +33,11 @@ function showErrors(errors) {
     if(box_exists) {
         var error_box = $("#errors");
         error_box.children(".error").remove();
+	    var markers = editor.getAllMarks();
+    	for(var i=0;i!=markers.length;++i) {
+        	markers[i].clear();
+	    }
+    	editor.clearGutter("errorGutter");
     } else {
         var error_box = $("<div id=\"errors\"><div id=\"title\">Errors</div></div>");
     }
