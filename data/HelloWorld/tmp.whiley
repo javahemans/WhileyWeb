@@ -1,4 +1,4 @@
-import * from whiley.lang.System // grrr
+import whiley.lang.System
 
-void ::main(System.Console console):
+method main(System.Console console):
     console.out.println("Hello World")

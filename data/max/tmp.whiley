@@ -1,21 +1,21 @@
-import * from whiley.lang.System
+import whiley.lang.*
 
 /** 
  * The max() function, which returns the greater 
  * of two integer arguments
  */
-int max(int x, int y)
+function max(int x, int y) => (int r)
 // result must be one of the arguments
-ensures $ == x || $ == y,
+ensures r == x || r == y
 // result must be greater-or-equal than arguments
-ensures $ >= x && $ >= y:
+ensures r >= x && r >= y:
     //
     if x > y:
     	return x
     else:
         return y
 
-void ::main(System.Console console):
-    console.out.println("max(10,0) = " + max(10,0))
-    console.out.println("max(5,6) = " + max(5,6))
-    console.out.println("max(0,0) = " + max(0,0))
+method main(System.Console console):
+    console.out.println("max(10,0) = " ++ max(10,0))
+    console.out.println("max(5,6) = " ++ max(5,6))
+    console.out.println("max(0,0) = " ++ max(0,0))

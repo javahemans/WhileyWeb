@@ -4,10 +4,10 @@
 //
 // By David J. Peace, 2013
 
-define nat as int where $ >= 0
+type nat is (int x) where x >= 0
 
 // First, define the state of the microwave.
-define Microwave as {
+type Microwave is {
         bool heatOn, // if true, the oven is cooking
         bool doorOpen, // if true, the door is open
         nat timer // timer setting (in seconds)
@@ -16,7 +16,7 @@ define Microwave as {
 // The clock tick event is signaled by the internal clock
 // circuits of the microwave. It is triggered every second
 // in order to implement timed cooking.
-Microwave clockTick(Microwave m):
+function clockTick(Microwave m) => Microwave:
         //
         if m.heatOn && m.timer == 0:
                 // Timer has expired
@@ -26,10 +26,10 @@ Microwave clockTick(Microwave m):
                 m.timer = m.timer - 1
         // If heating is not on, then ignore this event
         return m
-                
+
 // Set the timer on the microwave. This can't be done if
 // the microwave is cooking.
-Microwave setTimer(Microwave m, nat value)
+function setTimer(Microwave m, nat value) => Microwave
 requires !m.heatOn:
         //
         m.timer = value
@@ -38,7 +38,7 @@ requires !m.heatOn:
 // Signals that the "start cooking" button has been
 // pressed. Observe that, if the door is open, then
 // this event should have no effect.
-Microwave startCooking(Microwave m):
+function startCooking(Microwave m) => Microwave:
         //        
         // Here, we check the all important safety propery
         // for the microwave.
@@ -48,7 +48,7 @@ Microwave startCooking(Microwave m):
 
 // A door closed event is triggered when the sensor
 // detects that the door is closed.
-Microwave doorClosed(Microwave m)
+function doorClosed(Microwave m) => Microwave
 requires m.doorOpen:
         //
         m.doorOpen = false
@@ -56,7 +56,7 @@ requires m.doorOpen:
 
 // A door opened event is triggered when the sensor
 // detects that the door is opened.
-Microwave doorOpened(Microwave m)
+function doorOpened(Microwave m) => Microwave
 requires !m.doorOpen:
         //
         m.doorOpen = true
