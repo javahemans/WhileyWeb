@@ -33,24 +33,24 @@ function showErrors(errors) {
     if(box_exists) {
         var error_box = $("#errors");
         error_box.children(".error").remove();
+		clearErrors(false);
     } else {
         var error_box = $("<div id=\"errors\"><div id=\"title\">Errors</div></div>");
     }
     for(var i=0;i!=errors.length;++i) {
-        var error = $("<div></div>");
-        error.text(errors[i].text);
-        error.addClass("error");
-        error.bind("mouseenter", {err: errors[i]}, function(event) {
-            markError(event.data.err);
+		var error = errors[i];
+        var message = $("<div></div>");
+        message.text(error.text);
+        message.addClass("error");
+        message.bind("mouseenter", {err: error}, function(event) {
+            markError(event.data.err, true, false);
         });
-        error.bind("mouseleave", function(event) {
-            var markers = editor.getAllMarks();
-            for(var i=0;i!=markers.length;++i) {
-                markers[i].clear();
-            }
-            editor.clearGutter("errorGutter");
+        message.bind("mouseleave", {err: error}, function(event) {
+            markError(event.data.err, false, false);
         });
-        error.appendTo(error_box);
+        message.appendTo(error_box);
+        markError(error, false, true);
+		editor.errors.push(message);
     }
     if(!box_exists) {
         error_box.prependTo(".CodeMirror");
@@ -66,13 +66,17 @@ function showErrors(errors) {
  * Add an appropriate marker for a given JSON error object, as
  * returned from the server.
  */
-function markError(error) {
+function markError(error, highlight, gutter) {
+	if(error.mark) {
+		error.mark.clear();
+	}
     if(error.start != "" && error.end != "" && error.line != "") {
         var start = {line: error.line-1, ch: error.start};
         var end = {line: error.line-1, ch: error.end+1};
-        editor.markText(start, end, {className: "errorMarker", title: error.text});
+		var className = (highlight ? "errorMarkerHighlight" : "errorMarker");
+        error.mark = editor.markText(start, end, {className: className, title: error.text});
     }
-    if(error.line != "") {
+    if(gutter && error.line != "") {
         var marker = document.createElement("img");
         marker.src = "images/cross.png";
         marker.width = 10;
@@ -87,18 +91,24 @@ function markError(error) {
  * This is to prevent markers from a previous compilation from hanging
  * around.
  */
-function clearErrors() {
-    $(".CodeMirror-scroll").width("100%");
+function clearErrors(hideErrorPanel) {
     var markers = editor.getAllMarks();
     for(var i=0;i!=markers.length;++i) {
         markers[i].clear();
     }
+	for(var i=0;i!=editor.errors.length;++i) {
+		editor.errors[i].unbind("mouseenter mouseleave");
+	}
+	editor.errors = [];
     editor.clearGutter("errorGutter");
-    $("#errors").animate({
-        width: "0"
-    }, 500, function() {
-        $("#errors").remove();
-    });
+	if(hideErrorPanel) {
+	    $(".CodeMirror-scroll").width("100%");
+    	$("#errors").animate({
+	        width: "0"
+    	}, 500, function() {
+	        $("#errors").remove();
+    	});
+	}
 }
 
 /**
@@ -114,14 +124,14 @@ function compile() {
         $("#spinner").hide();
         var response = $.parseJSON(response);
         if(response.result == "success") {
-            clearErrors();
+            clearErrors(true);
             addMessage("success", "Compiled successfully.");
         } else if(response.result == "errors") {
             var errors = response.errors;
             showErrors(errors);
             addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
         } else if(response.result == "error") {
-            clearErrors();
+            clearErrors(true);
             addMessage("error", response.error);
         }
     });
@@ -140,7 +150,7 @@ function run() {
         $("#spinner").hide();
         var response = $.parseJSON(response);
         if(response.result == "success") {
-            clearErrors();
+            clearErrors(true);
             addMessage("success", "Compiled successfully. Running...");
             setTimeout(function() {console.value = response.output;}, 500);
         } else if(response.result == "errors") {
@@ -148,7 +158,7 @@ function run() {
             showErrors(errors);
             addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
         } else if(response.result == "error") {
-            clearErrors();
+            clearErrors(true);
             addMessage("error", response.error);
         }
     });
@@ -181,6 +191,15 @@ $(document).ready(function() {
         matchBrackets: true,
         mode: "whiley"
     });
+	editor.errors = [];
+	$(".CodeMirror").resizable({
+		resize: function() {
+			editor.setSize($(this).width(), $(this).height());
+		},
+		handles: "s",
+		cursor: "default",
+		minHeight: $(".CodeMirror").height()
+	});
 
     // If there is an error, display the error message for 5 seconds.
     if(error != "") {

@@ -102,7 +102,7 @@ body {
     overflow: hidden;
 }
 #errors .error:hover {
-    background-color: #ffbbbb;
+    background-color: #ffaaaa;
     white-space: normal;
 }
 
@@ -142,9 +142,32 @@ body {
  */
 .errorMarker {
     text-decoration: none;
-    border-bottom: 2px dotted red;
+	background-color: #ffcccc;
+}
+
+.errorMarkerHighlight {
+    text-decoration: none;
+	background-color: #ffaaaa;
 }
 
 .errorGutter {
     width: 10px;
+}
+
+/*
+ * Resize handle for code area.
+ */
+.ui-resizable-handle {
+	position: absolute;
+	font-size: 0.1px;
+	display: block;
+}
+.ui-resizable-s {
+	cursor: default;
+	height: 8px;
+	width: 8px;
+	bottom: 0;
+	right: 0;
+	background: url("../images/resizable.png");
+	background-repeat: no-repeat;
 }
