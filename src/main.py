@@ -16,14 +16,14 @@ from cherrypy import HTTPRedirect
 # Whiley Compiler Config
 # ============================================================
 
-WYJC_JAR="lib/wyjc-all-v0.3.22b.jar"
+WYJC_JAR="lib/wyjc-all-v0.3.22.jar"
 WYRT_JAR="lib/wyrt-v0.3.22.jar"
 
 # ============================================================
 # Java Config
 # ============================================================
 
-JAVA_CMD="/usr/local/bin/java"
+JAVA_CMD="/usr/bin/java"
 
 # ============================================================
 # Mako Config
@@ -166,6 +166,7 @@ def save(filename,data):
 # to disk in a temporary location, compiling it using the Whiley2Java
 # Compiler and then returning the compilation output.
 def compile(code,verify,dir):
+
     filename = dir + "/tmp.whiley"
     # set required arguments
     args = [
