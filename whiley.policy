@@ -1,0 +1,9 @@
+
+grant {
+  permission java.lang.RuntimePermission "shutdownHooks";
+  permission java.lang.RuntimePermission "accessClassInPackage.*";
+  permission java.util.PropertyPermission "user.dir", "read";  
+
+  permission java.io.FilePermission "data/-", "read,write";
+  permission java.io.FilePermission "lib/*", "read";
+};
