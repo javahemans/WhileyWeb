@@ -16,14 +16,14 @@ from cherrypy import HTTPRedirect
 # Whiley Compiler Config
 # ============================================================
 
-WYJC_JAR="lib/wyjc-all-v0.3.22.jar"
-WYRT_JAR="lib/wyrt-v0.3.22.jar"
+WYJC_JAR="lib/wyjc-all-v0.3.23.jar"
+WYRT_JAR="lib/wyrt-v0.3.23.jar"
 
 # ============================================================
 # Java Config
 # ============================================================
 
-JAVA_CMD="/usr/local/bin/java"
+JAVA_CMD="/usr/bin/java"
 
 # ============================================================
 # Mako Config
@@ -171,6 +171,8 @@ def compile(code,verify,dir):
     # set required arguments
     args = [
             JAVA_CMD,
+            "-Djava.security.manager",
+            "-Djava.security.policy=whiley.policy",            
             "-jar",
             WYJC_JAR,
             "-bootpath", WYRT_JAR, # set bootpath

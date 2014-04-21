@@ -83,7 +83,7 @@ CodeMirror.defineMode("whiley", function() {
 	"if",
 	"import",
 	"in",
-	"int"
+	"int",
 	"is",
 	"method",
 	"native",
