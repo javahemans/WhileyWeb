@@ -3,12 +3,10 @@
 <head>
     <title>Whiley on the Web!</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/codemirror.css">
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-ui.js"></script>
-    <script type="text/javascript" src="js/codemirror.js"></script>
-    <script type="text/javascript" src="js/matchbrackets.js"></script>
-    <script type="text/javascript" src="js/whiley.js"></script>
+    <script type="text/javascript" src="js/ace.js"></script>
+    <script type="text/javascript" src="js/mode-whiley.js"></script>
     <script type="text/javascript">
         var root_url = "${ROOT_URL}";
         var error = "${ERROR}";
@@ -20,7 +18,7 @@
     <div id="container">
         <div id="content">
             <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
-            <textarea id="code">${CODE}</textarea>
+            <div id="code">${CODE}</div>
             <section id="toolbar">
                 <button type="button" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
                 <button type="button" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
