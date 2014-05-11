@@ -76,7 +76,7 @@ class Main(object):
         shutil.rmtree(dir)
         # Fouth, return result as JSON
         if type(result) == str:
-            response = {"result": "error", "error": str}
+            response = {"result": "error", "error": result}
         elif len(result) != 0:
             response = {"result": "errors", "errors": result}
         else:
@@ -104,7 +104,7 @@ class Main(object):
         # Second, compile the code and then run it
         result = compile(code,"false",dir)
         if type(result) == str:
-            response = {"result": "error", "error": str}
+            response = {"result": "error", "error": result}
         elif len(result) != 0:
             response = {"result": "errors", "errors": result}
         else:

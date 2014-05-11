@@ -62,27 +62,3 @@ requires !m.doorOpen:
         m.doorOpen = true
         m.heatOn = false
         return m
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-

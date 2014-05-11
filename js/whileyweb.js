@@ -29,36 +29,10 @@ function clearMessages() {
  * Display all the compilation errors.
  */
 function showErrors(errors) {
-    var box_exists = $("#errors").length;
-    if(box_exists) {
-        var error_box = $("#errors");
-        error_box.children(".error").remove();
-		clearErrors(false);
-    } else {
-        var error_box = $("<div id=\"errors\"><div id=\"title\">Errors</div></div>");
-    }
+    clearErrors();
     for(var i=0;i!=errors.length;++i) {
 		var error = errors[i];
-        var message = $("<div></div>");
-        message.text(error.text);
-        message.addClass("error");
-        message.bind("mouseenter", {err: error}, function(event) {
-            markError(event.data.err, true, false);
-        });
-        message.bind("mouseleave", {err: error}, function(event) {
-            markError(event.data.err, false, false);
-        });
-        message.appendTo(error_box);
-        markError(error, false, true);
-		editor.errors.push(message);
-    }
-    if(!box_exists) {
-        error_box.prependTo(".CodeMirror");
-        error_box.animate({
-            width: "30%"
-        }, 500, function() {
-            $(".CodeMirror-scroll").width("70%");
-        });
+        markError(error);
     }
 }
 
@@ -66,21 +40,14 @@ function showErrors(errors) {
  * Add an appropriate marker for a given JSON error object, as
  * returned from the server.
  */
-function markError(error, highlight, gutter) {
-	if(error.mark) {
-		error.mark.clear();
-	}
+function markError(error) {
     if(error.start != "" && error.end != "" && error.line != "") {
-        var start = {line: error.line-1, ch: error.start};
-        var end = {line: error.line-1, ch: error.end+1};
-		var className = (highlight ? "errorMarkerHighlight" : "errorMarker");
-        error.mark = editor.markText(start, end, {className: className, title: error.text});
-    }
-    if(gutter && error.line != "") {
-        var marker = document.createElement("img");
-        marker.src = "images/cross.png";
-        marker.width = 10;
-        editor.setGutterMarker(error.line-1, "errorGutter", marker);
+        editor.getSession().setAnnotations([{
+            row: error.line - 1,
+            column: error.start,
+            text: error.text,
+            type: "error"
+        }]);
     }
 }
 
@@ -91,24 +58,8 @@ function markError(error, highlight, gutter) {
  * This is to prevent markers from a previous compilation from hanging
  * around.
  */
-function clearErrors(hideErrorPanel) {
-    var markers = editor.getAllMarks();
-    for(var i=0;i!=markers.length;++i) {
-        markers[i].clear();
-    }
-	for(var i=0;i!=editor.errors.length;++i) {
-		editor.errors[i].unbind("mouseenter mouseleave");
-	}
-	editor.errors = [];
-    editor.clearGutter("errorGutter");
-	if(hideErrorPanel) {
-	    $(".CodeMirror-scroll").width("100%");
-    	$("#errors").animate({
-	        width: "0"
-    	}, 500, function() {
-	        $("#errors").remove();
-    	});
-	}
+function clearErrors() {
+    editor.getSession().clearAnnotations();
 }
 
 /**
@@ -184,22 +135,26 @@ function save() {
 // Run this code when the page has loaded.
 $(document).ready(function() {
     // Enable the editor with Whiley syntax.
-    editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-        indentUnit: 4,
-        lineNumbers: true,
-        gutters: ["CodeMirror-linenumbers", "errorGutter"],
-        matchBrackets: true,
-        mode: "whiley"
+    editor = ace.edit("code");
+    var WhileyMode = require("ace/mode/whiley").Mode;
+    editor.getSession().setMode(new WhileyMode());
+    editor.setTheme("ace/theme/eclipse");
+    editor.setFontSize("10pt");
+    editor.setBehavioursEnabled(false);
+    editor.setHighlightActiveLine(true);
+    editor.setShowFoldWidgets(false);
+    editor.setShowPrintMargin(false);
+    editor.getSession().setUseSoftTabs(true);
+    editor.getSession().setTabSize(4);
+
+    $("#code").resizable({
+        resize: function() {
+            editor.resize();
+        },
+        handles: "s",
+        cursor: "default",
+        minHeight: $("#code").height()
     });
-	editor.errors = [];
-	$(".CodeMirror").resizable({
-		resize: function() {
-			editor.setSize($(this).width(), $(this).height());
-		},
-		handles: "s",
-		cursor: "default",
-		minHeight: $(".CodeMirror").height()
-	});
 
     // If there is an error, display the error message for 5 seconds.
     if(error != "") {

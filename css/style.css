@@ -70,8 +70,9 @@ body {
     border-bottom: 1px solid #ccc;
 }
 
-.CodeMirror {
+#code {
     border: 1px solid #ddd;
+    height: 300px;
 }
 
 #errors {
