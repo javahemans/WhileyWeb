@@ -205,9 +205,9 @@ def splitError(error):
     if len(parts) == 5:
         return {
             "filename": parts[0],
-            "line": parts[1],
-            "start": parts[2],
-            "end": parts[3],
+            "line": int(parts[1]),
+            "start": int(parts[2]),
+            "end": int(parts[3]),
             "text": parts[4]
         }
     else:

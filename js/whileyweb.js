@@ -41,15 +41,17 @@ function showErrors(errors) {
  * returned from the server.
  */
 function markError(error) {
-    if(error.start != "" && error.end != "" && error.line != "") {
+    if(error.start !== "" && error.end !== "" && error.line !== "") {
         editor.getSession().setAnnotations([{
             row: error.line - 1,
             column: error.start,
             text: error.text,
             type: "error"
         }]);
-        var range = new ace.Range(error.line-1, error.start, error.line-1, error.end);
+        var range = new ace.Range(error.line-1, error.start, error.line-1, error.end+1);
         editor.markers.push(editor.getSession().addMarker(range, "error-message", "error", false));
+    } else {
+        addMessage("error", error.text);
     }
 }
 
