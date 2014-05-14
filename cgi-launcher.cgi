@@ -25,7 +25,8 @@ cherrypy_config = {
     },
     "/": {
         "request.show_tracebacks": False,
-        "request.show_mismatched_params": False
+        "request.show_mismatched_params": False,
+        "log.error_file": config.ERROR_LOG
     }
 }
 def application(environ, start_response):

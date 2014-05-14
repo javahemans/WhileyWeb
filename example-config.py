@@ -29,3 +29,6 @@ from defaults import *
 
 # The location of the java executable.
 # JAVA_CMD = "java"
+
+# The location of the file to write errors to. Set to None for no logging.
+# ERROR_LOG = None
