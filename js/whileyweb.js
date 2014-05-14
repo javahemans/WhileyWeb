@@ -169,6 +169,7 @@ $(document).ready(function() {
         var error_message = $("<div></div>");
         error_message.text(error);
         error_message.addClass("error");
+        error_message.addClass("message");
         error_message.prependTo("#content");
         error_message.show().delay(2000).fadeOut(500, function() {
             // If the user should be redirected to the main page (due to invalid ID for example), do so.
