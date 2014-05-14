@@ -10,6 +10,9 @@ import cherrypy
 import main
 
 cherrypy_config = {
+    "global": {
+        "log.screen": None
+    },
     "/": {
         "request.show_tracebacks": False,
         "request.show_mismatched_params": False
