@@ -111,7 +111,7 @@ body {
  */
 .error-message {
     text-decoration: none;
-	background-color: #ffcccc;
+    border-bottom: 2px red dotted;
     position: absolute;
 }
 
