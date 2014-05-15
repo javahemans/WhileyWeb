@@ -75,39 +75,6 @@ body {
     height: 300px;
 }
 
-#errors {
-    font-family: 'Pontano Sans', Verdana, Helvetica, sans-serif;
-    width: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    z-index: 100;
-    background-color: #ffeeee;
-    border-left: 1px solid #fdd;
-    padding: 0.5em;
-}
-
-#errors #title {
-    color: #900;
-    margin-bottom: 0.5em;
-}
-
-#errors .error {
-    font-size: 10pt;
-    border: none;
-    padding: 0.5em;
-    margin-bottom: 1px;
-    cursor: pointer;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-#errors .error:hover {
-    background-color: #ffaaaa;
-    white-space: normal;
-}
-
 #console {
     font-family: "Courier New", Courier, monospace;
     font-size: 11pt;
@@ -142,18 +109,10 @@ body {
 /**
  * The error marker is the CSS style for highlighting errors.
  */
-.errorMarker {
+.error-message {
     text-decoration: none;
-	background-color: #ffcccc;
-}
-
-.errorMarkerHighlight {
-    text-decoration: none;
-	background-color: #ffaaaa;
-}
-
-.errorGutter {
-    width: 10px;
+    border-bottom: 2px red dotted;
+    position: absolute;
 }
 
 /*

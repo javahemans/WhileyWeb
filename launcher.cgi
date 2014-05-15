@@ -1,30 +1,24 @@
 #!/usr/bin/env python
 
-# ============================================================
-# Path Config
-# ============================================================
-
 import sys
 
+# Set up the path.
 sys.path.insert(0, "lib")
 sys.path.insert(0, "src")
 
-# ============================================================
-# Imports
-# ============================================================
-
+import config
 import cherrypy
 import main
 
-# ============================================================
-# Run Local HTTP Server
-# ============================================================
-
-config = {
+cherrypy_config = {
+    "global": {
+        "log.screen": None
+    },
     "/": {
         "request.show_tracebacks": False,
-        "request.show_mismatched_params": False
+        "request.show_mismatched_params": False,
+        "log.error_file": config.ERROR_LOG
     }
 }
-cherrypy.quickstart(main.Main("http://localhost:8080"), config=config)
+cherrypy.quickstart(main.Main(), config=cherrypy_config)
 

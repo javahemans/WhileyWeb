@@ -8,43 +8,21 @@ import subprocess
 import json
 import re
 
+import config
+
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
-
-# ============================================================
-# Whiley Compiler Config
-# ============================================================
-
-WYJC_JAR="lib/wyjc-all-v0.3.24.jar"
-WYRT_JAR="lib/wyrt-v0.3.24.jar"
-
-# ============================================================
-# Java Config
-# ============================================================
-
-JAVA_CMD="/usr/local/bin/java"
-
-# ============================================================
-# Mako Config
-# ============================================================
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
 lookup = TemplateLookup(directories=['html'])
 
 # ============================================================
-# Application Config
-# ============================================================
-WORKING_DIR="data"
-
-# ============================================================
 # Application Entry
 # ============================================================
 
 class Main(object):
-    def __init__(self,root_url):
-        self.root_url = root_url
 
     # gives access to images/
     def images(self, filename, *args, **kwargs):
@@ -69,7 +47,7 @@ class Main(object):
         allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
-        dir = WORKING_DIR + "/" + dir
+        dir = config.DATA_DIR + "/" + dir
         # Second, compile the code
         result = compile(code,verify,dir)
         # Third, delete working directory
@@ -89,7 +67,7 @@ class Main(object):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
-        save(WORKING_DIR + "/" + dir + "/tmp.whiley", code)
+        save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code)
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -100,7 +78,7 @@ class Main(object):
         allow(["HEAD", "POST"])
         # First, create working directory
         dir = createWorkingDirectory()
-        dir = WORKING_DIR + "/" + dir
+        dir = config.DATA_DIR + "/" + dir
         # Second, compile the code and then run it
         result = compile(code,"false",dir)
         if type(result) == str:
@@ -127,7 +105,7 @@ class Main(object):
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
             # Load the file
-            code = load(WORKING_DIR + "/" + safe_id + "/tmp.whiley")
+            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
             # Escape the code
             code = cgi.escape(code)
         except Exception:
@@ -135,7 +113,7 @@ class Main(object):
             error = "Invalid ID: %s" % id
             redirect = "YES"
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=self.root_url,CODE=code,ERROR=error,REDIRECT=redirect)
+        return template.render(ROOT_URL=config.ROOT_URL,CODE=code,ERROR=error,REDIRECT=redirect)
     index.exposed = True
     # exposed
 
@@ -170,10 +148,10 @@ def compile(code,verify,dir):
     filename = dir + "/tmp.whiley"
     # set required arguments
     args = [
-            JAVA_CMD,
+            config.JAVA_CMD,
             "-jar",
-            WYJC_JAR,
-            "-bootpath", WYRT_JAR, # set bootpath
+            config.WYJC_JAR,
+            "-bootpath", config.WYRT_JAR, # set bootpath
             "-whileydir", dir,     # set location of Whiley source file(s)
             "-classdir", dir,      # set location to place class file(s)
             "-brief"              # enable brief compiler output (easier to parse)
@@ -200,10 +178,10 @@ def run(dir):
     try:
         # run the JVM
         proc = subprocess.Popen([
-            JAVA_CMD,
+            config.JAVA_CMD,
             "-Djava.security.manager",
             "-Djava.security.policy=whiley.policy",            
-            "-cp",WYJC_JAR + ":" + dir,
+            "-cp",config.WYJC_JAR + ":" + dir,
             "tmp"
             ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         (out, err) = proc.communicate()
@@ -227,9 +205,9 @@ def splitError(error):
     if len(parts) == 5:
         return {
             "filename": parts[0],
-            "line": parts[1],
-            "start": parts[2],
-            "end": parts[3],
+            "line": int(parts[1]),
+            "start": int(parts[2]),
+            "end": int(parts[3]),
             "text": parts[4]
         }
     else:
@@ -243,6 +221,6 @@ def splitError(error):
 
 # Get the working directory for this request.
 def createWorkingDirectory():
-    dir = tempfile.mkdtemp(prefix="",dir=WORKING_DIR)
+    dir = tempfile.mkdtemp(prefix="",dir=config.DATA_DIR)
     tail,head = os.path.split(dir)
     return head

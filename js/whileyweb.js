@@ -41,13 +41,17 @@ function showErrors(errors) {
  * returned from the server.
  */
 function markError(error) {
-    if(error.start != "" && error.end != "" && error.line != "") {
+    if(error.start !== "" && error.end !== "" && error.line !== "") {
         editor.getSession().setAnnotations([{
             row: error.line - 1,
             column: error.start,
             text: error.text,
             type: "error"
         }]);
+        var range = new ace.Range(error.line-1, error.start, error.line-1, error.end+1);
+        editor.markers.push(editor.getSession().addMarker(range, "error-message", "error", false));
+    } else {
+        addMessage("error", error.text);
     }
 }
 
@@ -60,6 +64,10 @@ function markError(error) {
  */
 function clearErrors() {
     editor.getSession().clearAnnotations();
+    for (var i = 0; i < editor.markers.length; i++) {
+        editor.getSession().removeMarker(editor.markers[i]);
+    }
+    editor.markers = [];
 }
 
 /**
@@ -134,6 +142,7 @@ function save() {
 
 // Run this code when the page has loaded.
 $(document).ready(function() {
+    ace.Range = require('ace/range').Range;
     // Enable the editor with Whiley syntax.
     editor = ace.edit("code");
     var WhileyMode = require("ace/mode/whiley").Mode;
@@ -141,11 +150,12 @@ $(document).ready(function() {
     editor.setTheme("ace/theme/eclipse");
     editor.setFontSize("10pt");
     editor.setBehavioursEnabled(false);
-    editor.setHighlightActiveLine(true);
+    editor.setHighlightActiveLine(false);
     editor.setShowFoldWidgets(false);
     editor.setShowPrintMargin(false);
     editor.getSession().setUseSoftTabs(true);
     editor.getSession().setTabSize(4);
+    editor.markers = [];
 
     $("#code").resizable({
         resize: function() {
@@ -161,6 +171,7 @@ $(document).ready(function() {
         var error_message = $("<div></div>");
         error_message.text(error);
         error_message.addClass("error");
+        error_message.addClass("message");
         error_message.prependTo("#content");
         error_message.show().delay(2000).fadeOut(500, function() {
             // If the user should be redirected to the main page (due to invalid ID for example), do so.

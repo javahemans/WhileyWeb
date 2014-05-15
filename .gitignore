@@ -4,3 +4,4 @@ data/*
 !data/abs
 !data/max
 !data/microwave
+config.py
