@@ -5,14 +5,17 @@ import cgi
 import cgitb
 import sys
 
-import config
+HOME_DIR = r"/u/staff/djp/projects/WhileyWeb/"
 
-os.chdir(config.HOME_DIR)
-if config.DEBUG:
-    cgitb.enable()
+os.chdir(HOME_DIR)
 
 sys.path.insert(0, "lib")
 sys.path.insert(0, "src")
+
+import config
+
+if config.DEBUG:
+    cgitb.enable()
 
 import cherrypy
 import main
