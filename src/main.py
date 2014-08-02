@@ -181,7 +181,7 @@ def run(dir):
         proc = subprocess.Popen([
             config.JAVA_CMD,
             "-Djava.security.manager",
-            "-Djava.security.policy=whiley.policy",            
+            "-Djava.security.policy=whiley.policy",
             "-cp",config.WYJC_JAR + ":" + dir,
             "tmp"
             ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
