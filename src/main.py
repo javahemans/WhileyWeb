@@ -8,6 +8,7 @@ import subprocess
 import json
 import re
 import codecs
+from threading import Timer
 
 import config
 
@@ -185,8 +186,18 @@ def run(dir):
             "-cp",config.WYJC_JAR + ":" + dir,
             "tmp"
             ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+        # Configure Timeout
+        kill_proc = lambda p: p.kill()
+        timer = Timer(20, kill_proc, [proc])
+        timer.start()
+        # Run process        
         (out, err) = proc.communicate()
-        return out
+        timer.cancel()
+        # Check what happened
+        if proc.returncode >= 0:
+            return out
+        else:
+            return "Timeout: Your program ran for too long!"
     except Exception as ex:
         # error, so return that
         return "Run Error: " + str(ex)
