@@ -231,9 +231,9 @@ def splitErrors(errors):
 def splitError(error):
     parts = error.split(":", 5)
     if len(parts) >= 5:
-        context = "[]"
+        context = []
         if len(parts) == 6:
-            context = parts[5]
+            context = splitContext(parts[5])
         
         return {
             "filename": parts[0],
@@ -241,7 +241,7 @@ def splitError(error):
             "start": int(parts[2]),
             "end": int(parts[3]),
             "text": parts[4],
-            "context": splitContext(context)
+            "context": context
         }
     else:
         return {
