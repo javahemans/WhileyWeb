@@ -42,17 +42,26 @@ function showErrors(errors) {
  */
 function markError(error) {
     if(error.start !== "" && error.end !== "" && error.line !== "") {
+	// First, add error markers
         editor.getSession().setAnnotations([{
             row: error.line - 1,
             column: error.start,
             text: error.text.replace("\\n","\n"),
             type: "error"
         }]);
-        var range = new ace.Range(error.line-1, error.start, error.line-1, error.end+1);
-        editor.markers.push(editor.getSession().addMarker(range, "error-message", "error", false));
+	underScoreError(error,"error-message","error");
+	// Second, add context markers (if any)
+	for (var i = 0; i < error.context.length; i++) {
+	    underScoreError(error.context[i],"context-message","error");
+	}
     } else {
         addMessage("error", error.text);
     }
+}
+
+function underScoreError(error,kind,message) {
+    var range = new ace.Range(error.line-1, error.start, error.line-1, error.end+1);
+    editor.markers.push(editor.getSession().addMarker(range, kind, message, false));
 }
 
 /**

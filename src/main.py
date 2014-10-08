@@ -229,14 +229,19 @@ def splitErrors(errors):
     return r
 
 def splitError(error):
-    parts = error.split(":", 4)
-    if len(parts) == 5:
+    parts = error.split(":", 5)
+    if len(parts) >= 5:
+        context = "[]"
+        if len(parts) == 6:
+            context = parts[5]
+        
         return {
             "filename": parts[0],
             "line": int(parts[1]),
             "start": int(parts[2]),
             "end": int(parts[3]),
-            "text": parts[4]
+            "text": parts[4],
+            "context": splitContext(context)
         }
     else:
         return {
@@ -246,6 +251,19 @@ def splitError(error):
             "end": "",
             "text": error
         }
+
+def splitContext(context):
+    r = []
+    cs = context.split(",")
+    for c in cs:
+        parts = c.split(":", 3)
+        r.append({
+            "filename": parts[0],
+            "line": int(parts[1]),
+            "start": int(parts[2]),
+            "end": int(parts[3])
+        })
+    return r
 
 # Get the working directory for this request.
 def createWorkingDirectory():

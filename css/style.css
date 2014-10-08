@@ -115,6 +115,15 @@ body {
     position: absolute;
 }
 
+/**
+ * The context marker is the CSS style for highlighting contextual info.
+ */
+.context-message {
+    text-decoration: none;
+    border-bottom: 2px goldenrod dotted;
+    position: absolute;
+}
+
 /*
  * Resize handle for code area.
  */
