@@ -152,7 +152,7 @@ def compile(code,verify,dir):
     args = [
             config.JAVA_CMD,
             "-jar",
-            config.WYJC_JAR,
+            config.WYJC_JAR,            
             "-bootpath", config.WYRT_JAR, # set bootpath
             "-whileydir", dir,     # set location of Whiley source file(s)
             "-classdir", dir,      # set location to place class file(s)
