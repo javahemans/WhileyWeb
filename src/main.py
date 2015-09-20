@@ -169,7 +169,7 @@ def compile(code,verify,dir):
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         # Configure Timeout
         kill_proc = lambda p: p.kill()
-        timer = Timer(15, kill_proc, [proc])
+        timer = Timer(30, kill_proc, [proc])
         timer.start()
         # Run process        
         (out, err) = proc.communicate()
@@ -229,7 +229,7 @@ def splitErrors(errors):
     return r
 
 def splitError(error):
-    parts = error.split(":", 5)
+    parts = error.split(":", 4)
     if len(parts) >= 5:
         context = []
         if len(parts) == 6:
