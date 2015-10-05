@@ -12,7 +12,7 @@ from defaults import *
 
 # The root URL that WhileyWeb will be accessed through.
 # It MUST NOT end in a slash. If the script_name refers to the root of the URI,
-# it MUST be an empty string (not “/”).
+# it MUST be an empty string (not "/").
 # ROOT_URL = ""
 
 # The home directory for WhileyWeb.
