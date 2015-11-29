@@ -185,9 +185,9 @@ def compile(code,verify,dir):
             }]
         # Continue
         if err == None:
-            return splitErrors(out)
+            return splitErrors(out.decode())
         else:
-            return splitErrors(err)
+            return splitErrors(err.decode())
     except Exception as ex:
         # error, so return that
         return "Compile Error: " + str(ex)
@@ -211,7 +211,7 @@ def run(dir):
         timer.cancel()
         # Check what happened
         if proc.returncode >= 0:
-            return out
+            return out.decode()
         else:
             return "Timeout: Your program ran for too long!"
     except Exception as ex:
