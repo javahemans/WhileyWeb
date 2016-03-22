@@ -1,0 +1,11 @@
+[Unit]
+Description=Whiley web on localhost:8080
+
+[Service]
+User=whiley
+Group=whiley
+WorkingDirectory=/opt/WhileyWeb/
+ExecStart=/opt/WhileyWeb/launcher.cgi
+
+[Install]
+WantedBy=multiuser.target
