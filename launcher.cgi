@@ -12,7 +12,9 @@ import main
 
 cherrypy_config = {
     "global": {
-        "log.screen": None
+        "log.screen": True,
+        "server.socket_host" : "0.0.0.0",
+        "server.socket_port" : 80
     },
     "/": {
         "request.show_tracebacks": False,
