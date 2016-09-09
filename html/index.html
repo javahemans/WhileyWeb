@@ -1,50 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Whiley on the Web!</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/jquery-ui.js"></script>
-    <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
-    <script type="text/javascript" src="js/mode-whiley.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script type="text/javascript" src="../js/jquery.js"></script>
+    <script type="text/javascript" src="../js/jquery-ui.js"></script>
+    <script type="text/javascript" src="../js/ace.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/mode-whiley.js"></script>
     <script type="text/javascript">
         var root_url = "${ROOT_URL}";
         var error = "${ERROR}";
         var redirect = "${REDIRECT}";
     </script>
-    <script type="text/javascript" src="js/whileyweb.js"></script>
+    <script type="text/javascript" src="../js/whileyweb.js"></script>
     <script type="text/javascript">
-        window.onbeforeunload = function(){
- 		return 'Are you sure you want to leave Whiley on the Web? Changes will not be saved.';
-	};
+        window.onbeforeunload = function () {
+            return 'Are you sure you want to leave Whiley on the Web? Changes will not be saved.';
+        };
     </script>
+
+
 </head>
 <body>
-    <div id="container">
-        <div id="content">
-            <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
-            <div id="code">${CODE}</div>
-            <section id="toolbar">
-                <button type="button" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
-                <button type="button" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
-                <button type="button" onClick="run();" title="Run your program to produce some output!">Run</button>
-                <input id="verification" type="checkBox" checked="checked" title="Enable or disable compile-time verification">Enable Verification</input>
-                <img id="spinner" src="images/loading.gif" />
-            </section>
-            <div id="messages"></div>
-            <textarea id="console" readonly="readonly"></textarea>
+
+<div id="wrapper" style="width: 100%;">
+
+    <div id="leftContainer" style="float: left;">
+        <div id="whiley-style" style="display: inline;" class="init visible"><h2>Whiley Style <span></span></h2>
+            <div class="options" style="display: inline;"><h3>Color Theme</h3>
+                <ul class="colors">
+                    <li class="gold" data-skin="gold"><span></span></li>
+                    <li class="silver active" data-skin="silver"><span></span></li>
+                    <li class="blue" data-skin="blue"><span></span></li>
+                    <li class="red" data-skin="red"><span></span></li>
+                    <li class="green" data-skin="green"><span></span></li>
+                    <li class="brown" data-skin="brown"><span></span></li>
+                    <li class="lightblue" data-skin="lightblue"><span></span></li>
+                    <li class="white" data-skin="white"><span></span></li>
+                </ul>
+                <h3>Page Transition</h3>
+                <ul class="transitions">
+                    <li>fade</li>
+                    <li>scale</li>
+                    <li class="active">scroll vertical</li>
+                    <li>scroll horizontal</li>
+                </ul>
+            </div>
         </div>
     </div>
-    <script type="text/javascript">
-        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
-        try {
-            var pageTracker = _gat._getTracker("UA-5582165-5");
-            pageTracker._trackPageview();
-        } catch(err) {}
-    </script>
+
+    <div id="rightContainer" style="float: right; width:100%; margin: auto;">
+        <div id="container">
+            <div id="content">
+                <p>From this page, you can run Whiley programs in your browser! For more on Whiley, visit <a
+                        href="http://whiley.org">whiley.org</a>.</p>
+                <div id="code">${CODE}</div>
+                <section id="toolbar">
+                    <button type="button" onClick="save();"
+                            title="Create a permalink of this program to share with others.">
+                        Share
+                    </button>
+                    <button type="button" onClick="compile();" title="Compile your program to check it is correct.">
+                        Compile
+                    </button>
+                    <button type="button" onClick="run();" title="Run your program to produce some output!">Run</button>
+                    <input id="verification" type="checkBox" checked="checked"
+                           title="Enable or disable compile-time verification">Enable Verification</input>
+                    <img id="spinner" src="../images/loading.gif"/>
+                </section>
+                <div id="messages"></div>
+                <textarea id="console" readonly="readonly"></textarea>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+<script type="text/javascript">
+    try {
+        var pageTracker = _gat._getTracker("UA-5582165-5");
+        pageTracker._trackPageview();
+    } catch (err) {
+    }
+
+
+    $(document).ready(function () {
+        //Ready >>
+        var $whileyStyle = $('#whiley-style');
+        $whileyStyle.find('h2 span').click(function() {
+            $whileyStyle.toggleClass('visible');
+        });
+    });
+
+</script>
 </body>
 </html>
