@@ -244,7 +244,7 @@ body {
     display: none;
 }
 #whiley-style ul.colors li::after {
-    content: "\2713";
+    /*content: "\2713";*/
     display: block;
     opacity: 0;
     width: 22px;
@@ -346,16 +346,6 @@ body {
 }
 
 
-#content{
-    /*background-image: url();*/
-    background-image: -moz-linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
-    background-image: -webkit-linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
-    background-image: -o-linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
-    background-image: linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
-    border-color: #b2cceb;
-    border-bottom-color: #82adde;
-}
-
 
 @media screen and (max-width: 700px) {
     #whiley-style ul.colors {
@@ -393,4 +383,20 @@ body {
     position: absolute;
     top: 2px;
     left: 9px;
+}
+
+
+#options ul{
+    padding: 0px;
+}
+
+#options ul li{
+    padding: 10px;
+    margin: 0px 0px 3px 0px;
+    background-color: #34495e;
+}
+
+#options ul li{
+    list-style: none;
+    color: white;;
 }

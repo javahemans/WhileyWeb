@@ -1,0 +1,23 @@
+/* ==========================================================================
+   Table of Contents:
+
+   1. Whiley Editor BG Color
+
+   ========================================================================== */
+
+
+
+
+/* ==========================================================================
+   1. Whiley Editor BG Color
+   ========================================================================== */
+
+#content{
+  /*background-image: url();*/
+  background-image: -moz-linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
+  background-image: -webkit-linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
+  background-image: -o-linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
+  background-image: linear-gradient(top, #ffffff 0%, #b8d4f4 100%);
+  border-color: #b2cceb;
+  border-bottom-color: #82adde;
+}

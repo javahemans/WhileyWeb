@@ -4,10 +4,13 @@
     <meta charset="utf-8"/>
     <title>Whiley on the Web!</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/skin/skin-silver.css" id="theme">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     <script type="text/javascript" src="../js/jquery.js"></script>
     <script type="text/javascript" src="../js/jquery-ui.js"></script>
     <script type="text/javascript" src="../js/ace.js" charset="utf-8"></script>
     <script type="text/javascript" src="../js/mode-whiley.js"></script>
+
     <script type="text/javascript">
         var root_url = "${ROOT_URL}";
         var error = "${ERROR}";
@@ -27,17 +30,17 @@
 <div id="wrapper" style="width: 100%;">
 
     <div id="leftContainer" style="float: left;">
-        <div id="whiley-style" style="display: inline;" class="init visible"><h2>Whiley Style <span></span></h2>
+        <div id="whiley-style" style="display: inline;" class="init"><h2>Whiley Style <span></span></h2>
             <div class="options" style="display: inline;"><h3>Color Theme</h3>
                 <ul class="colors">
-                    <li class="gold" data-skin="gold"><span></span></li>
-                    <li class="silver active" data-skin="silver"><span></span></li>
-                    <li class="blue" data-skin="blue"><span></span></li>
-                    <li class="red" data-skin="red"><span></span></li>
-                    <li class="green" data-skin="green"><span></span></li>
-                    <li class="brown" data-skin="brown"><span></span></li>
-                    <li class="lightblue" data-skin="lightblue"><span></span></li>
-                    <li class="white" data-skin="white"><span></span></li>
+                    <li class="gold" data-skin="skin-gold"><span></span></li>
+                    <li class="silver active" data-skin="skin-silver"><span></span></li>
+                    <li class="blue" data-skin="skin-blue"><span></span></li>
+                    <li class="red" data-skin="skin-red"><span></span></li>
+                    <li class="green" data-skin="skin-green"><span></span></li>
+                    <li class="brown" data-skin="skin-brown"><span></span></li>
+                    <li class="lightblue" data-skin="skin-lightblue"><span></span></li>
+                    <li class="white" data-skin="skin-white"><span></span></li>
                 </ul>
                 <h3>Page Transition</h3>
                 <ul class="transitions">
@@ -50,11 +53,22 @@
         </div>
     </div>
 
-    <div id="rightContainer" style="float: right; width:100%; margin: auto;">
-        <div id="container">
+    <div id="rightContainer" style="width:100%; margin: auto;">
+        <div id="container" style="">
             <div id="content">
-                <p>From this page, you can run Whiley programs in your browser! For more on Whiley, visit <a
-                        href="http://whiley.org">whiley.org</a>.</p>
+
+                <div id="options" style="display:none;width: 300px; height: 354px; float: left; background-color: #2c3e50; border-radius: 5px; margin: 10px 10px 0px 0px;">
+                    <ul>
+                        <li><i class="fa fa-folder-open-o" aria-hidden="true"></i> Open File</li>
+                        <li><i class="fa fa-floppy-o" aria-hidden="true"></i> Save File</li>
+                        <li><i class="fa fa-folder-open-o" aria-hidden="true"></i> Export</li>
+                    </ul>
+                </div>
+
+                <p style="overflow: hidden;">
+                    <button id="slideBtn" style="float: left; margin-right: 5px;"><i class="fa fa-bars" aria-hidden="true"></i></button>From this page, you can run Whiley programs in your browser! For more on Whiley, visit <a
+                        href="http://whiley.org">whiley.org</a>.
+                    </p>
                 <div id="code">${CODE}</div>
                 <section id="toolbar">
                     <button type="button" onClick="save();"
@@ -92,11 +106,31 @@
 
     $(document).ready(function () {
         //Ready >>
+
+        $("a").click(function(){
+            $(this).toggleClass("open");
+            $("h1").addClass("fade");
+        });
+
         var $whileyStyle = $('#whiley-style');
         $whileyStyle.find('h2 span').click(function() {
             $whileyStyle.toggleClass('visible');
         });
+
+        $('ul.colors li').click(function() {
+            var skin = this.getAttribute("data-skin") + ".css";
+            $('#theme').attr('href','../css/skin/'+ skin);
+        });
+
+
+        $('#slideBtn').click(function() {
+            $("#options").animate({width:'toggle'},350);
+        });
+
+
     });
+
+
 
 </script>
 </body>
