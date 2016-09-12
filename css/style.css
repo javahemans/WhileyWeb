@@ -400,3 +400,8 @@ body {
     list-style: none;
     color: white;;
 }
+
+#options ul li a{
+    color: white;
+    text-decoration: none;
+}
