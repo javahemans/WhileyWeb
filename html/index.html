@@ -43,6 +43,38 @@
 </head>
 <body>
 
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a style="    padding: 5px 15px !important;" class="navbar-brand" href=""><img  style="border-radius: 5px; padding: 0px !important;" src="logo.png" width="40" height="40" alt="whiley Logo"></a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Homepage <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Whiley Community</a></li>
+                <li><a href="#">Help?</a></li>
+                <li><a href="#">Github</a></li>
+
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a onclick="signUp()">Sign Up</a></li>
+                <li><a onclick="login()">Login</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+
 <div id="wrapper" style="width: 100%;">
 
     <div id="leftContainer" style="float: left;">
@@ -328,7 +360,7 @@
         var element = '<li><a href="#' + nameWithoutWhileyExtension + '" data-toggle="tab">' + name + '</a></li>';
         fileNames.innerHTML = fileNames.innerHTML + element;
 
-        var template = '<div class="tab-pane" id="' + nameWithoutWhileyExtension +'"><div class="code">${CODE}'+ nameWithoutWhileyExtension +'</div> <section class="toolbar"><button type="button" class="btn btn-default" onClick="save();"title="Create a permalink of this program to share with others.">Share</button><button type="button" class="btn btn-default" onClick="compile();" title="Compile your program to check it is correct."> Compile </button> <button type="button" class="btn btn-default" onClick="run();" title="Run your program to produce some output!">Run </button> <button type="button" class="btn btn-default" onClick="saveMansour();" title="Save your program for later usage!">Save </button> <button type="button" class="btn btn-default" onClick="downloadMansour();"title="download your program that you written!">Download</button><label for="verification" style="padding-left: 10px;"><input id="verification" name="verification" type="checkBox" checked="checked"title="Enable or disable compile-time verification"><span style="padding-left: 5px;">Enable Verification</span></input></label><img id="spinner" src="../images/loading.gif"/></section></div>';
+        var template = '<div class="tab-pane" id="' + nameWithoutWhileyExtension +'"><div class="code">${CODE}'+ nameWithoutWhileyExtension +'</div> <section class="toolbar"><button type="button" class="btn btn-default" onClick="save();"title="Create a permalink of this program to share with others.">Share</button><button type="button" class="btn btn-default" onClick="compile();" title="Compile your program to check it is correct."> Compile </button> <button type="button" class="btn btn-default" onClick="run();" title="Run your program to produce some output!">Run </button> <button type="button" class="btn btn-default" onClick="saveMansour();" title="Save your program for later usage!">Save </button> <button type="button" class="btn btn-default" onClick="downloadMansour();"title="download your program that you written!">Download</button><button type="button" class="btn btn-default" onClick="newFile();"title="create New File For writing program!">New File</button><label for="verification" style="padding-left: 10px;"><input id="verification" name="verification" type="checkBox" checked="checked"title="Enable or disable compile-time verification"><span style="padding-left: 5px;">Enable Verification</span></input></label><img id="spinner" src="../images/loading.gif"/></section></div>';
 
 
         var tabContent = document.getElementById("tab-content-code");
@@ -369,7 +401,13 @@
         editors[index].markers = [];
 
     });
+    function login() {
+        console.log("Login");
+    }
 
+    function signUp() {
+        console.log("SignUp");
+    }
     /*
      setInterval(function(){
      console.log(window.location.href);}, 300);*/
