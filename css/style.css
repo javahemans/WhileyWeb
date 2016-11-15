@@ -6,7 +6,7 @@ body {
     margin: 0px;
     padding: 0px;
     font-family: "helvetica";
-    background: #cccccc;
+    background: #cccccc !important;
 }
 
 #header {
@@ -74,7 +74,10 @@ body {
     border: 1px solid #ddd;
     height: 300px;
 }
-
+.code {
+    border: 1px solid #ddd;
+    height: 300px;
+}
 #console {
     font-family: "Courier New", Courier, monospace;
     font-size: 11pt;
@@ -92,15 +95,16 @@ body {
     padding: 0.5em;
 }
 
-#toolbar {
+.toolbar {
     margin-top: 0.5em;
+
 }
 
-#toolbar button {
+.toolbar button {
     font-size: 11pt;
 }
 
-#toolbar #spinner {
+.toolbar #spinner {
     display: none;
     vertical-align: middle;
     margin: 1px;

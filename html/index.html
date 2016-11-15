@@ -11,6 +11,11 @@
     <script type="text/javascript" src="../js/ace.js" charset="utf-8"></script>
     <script type="text/javascript" src="../js/mode-whiley.js"></script>
 
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/sweetalert2/6.1.0/sweetalert2.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/sweetalert2/6.1.0/sweetalert2.min.js"></script>
+
+
     <script type="text/javascript">
         var root_url = "${ROOT_URL}";
         var error = "${ERROR}";
@@ -22,7 +27,18 @@
             return 'Are you sure you want to leave Whiley on the Web? Changes will not be saved.';
         };
     </script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -57,7 +73,8 @@
         <div id="container" style="">
             <div id="content">
 
-                <div id="options" style="display:none;width: 300px; height: 354px; float: left; background-color: #2c3e50; border-radius: 5px; margin: 10px 10px 0px 0px;">
+                <div id="options"
+                     style="display:none;width: 300px; height: 354px; float: left; background-color: #2c3e50; border-radius: 5px; margin: 10px 10px 0px 0px;">
                     <ul>
                         <li><a href="#"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Open File</a></li>
                         <li><a href="#"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save File</a></li>
@@ -66,24 +83,158 @@
                     </ul>
                 </div>
 
-                <p style="overflow: hidden;">
-                    <button id="slideBtn" style="float: left; margin-right: 5px;"><i class="fa fa-bars" aria-hidden="true"></i></button>From this page, you can run Whiley programs in your browser! For more on Whiley, visit <a
+                <p style="overflow: hidden;margin-top: 5px;">
+                    <button id="slideBtn" style="float: left; margin-right: 5px;"><i class="fa fa-bars"
+                                                                                     aria-hidden="true"></i></button>
+                    From this page, you can run Whiley programs in your browser! For more on Whiley, visit <a
                         href="http://whiley.org">whiley.org</a>.
-                    </p>
-                <div id="code">${CODE}</div>
-                <section id="toolbar">
-                    <button type="button" onClick="save();"
-                            title="Create a permalink of this program to share with others.">
-                        Share
-                    </button>
-                    <button type="button" onClick="compile();" title="Compile your program to check it is correct.">
-                        Compile
-                    </button>
-                    <button type="button" onClick="run();" title="Run your program to produce some output!">Run</button>
-                    <input id="verification" type="checkBox" checked="checked"
-                           title="Enable or disable compile-time verification">Enable Verification</input>
-                    <img id="spinner" src="../images/loading.gif"/>
-                </section>
+                </p>
+
+                <div id="exTab3" class="container" >
+                    <div class="whileyFileNames" >
+                        <ul class="nav nav-pills " id="fileNames" >
+                            <li class="active">
+                                <a href="#1b" data-toggle="tab">AbsFunction.wy</a>
+                            </li>
+                            <li>
+                                <a href="#2b" data-toggle="tab">LoopInvariant.wy</a>
+                            </li>
+                            <li>
+                                <a href="#3b" data-toggle="tab">Contains.wy</a>
+                            </li>
+                            <li>
+                                <a href="#4a" data-toggle="tab">Reverse.wy</a>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="tab-content clearfix" id="tab-content-code">
+                        <div class="tab-pane active" id="1b">
+                            <div id="code">${CODE}</div>
+                            <section class="toolbar">
+                                <button type="button" class="btn btn-default" onClick="save();"
+                                        title="Create a permalink of this program to share with others.">
+                                    Share
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="compile();"
+                                        title="Compile your program to check it is correct.">
+                                    Compile
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="run();"
+                                        title="Run your program to produce some output!">Run
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="saveMansour();"
+                                        title="Save your program for later usage!">Save
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="downloadMansour();"
+                                        title="download your program that you written!">Download
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="newFile();"
+                                        title="create New File For writing program!">New File
+                                </button>
+                                <label for="verification" style="padding-left: 10px;">
+                                    <input id="verification" name="verification" type="checkBox" checked="checked"
+                                           title="Enable or disable compile-time verification"><span
+                                        style="padding-left: 5px;">Enable Verification</span></input>
+                                </label>
+                                <img id="spinner" src="../images/loading.gif"/>
+                            </section>
+                        </div>
+                        <div class="tab-pane" id="2b">
+                            <div class="code">${CODE}</div>
+                            <section class="toolbar">
+                                <button type="button" class="btn btn-default" onClick="save();"
+                                        title="Create a permalink of this program to share with others.">
+                                    Share
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="compile();"
+                                        title="Compile your program to check it is correct.">
+                                    Compile
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="run();"
+                                        title="Run your program to produce some output!">Run
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="saveMansour();"
+                                        title="Save your program for later usage!">Save
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="downloadMansour();"
+                                        title="download your program that you written!">Download
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="newFile();"
+                                        title="create New File For writing program!">New File
+                                </button>
+                                <label for="verification" style="padding-left: 10px;">
+                                    <input id="verification" name="verification" type="checkBox" checked="checked"
+                                           title="Enable or disable compile-time verification"><span
+                                        style="padding-left: 5px;">Enable Verification</span></input>
+                                </label>
+                                <img id="spinner" src="../images/loading.gif"/>
+                            </section>
+                        </div>
+                        <div class="tab-pane" id="3b">
+                            <div class="code">${CODE}</div>
+                            <section class="toolbar">
+                                <button type="button" class="btn btn-default" onClick="save();"
+                                        title="Create a permalink of this program to share with others.">
+                                    Share
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="compile();"
+                                        title="Compile your program to check it is correct.">
+                                    Compile
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="run();"
+                                        title="Run your program to produce some output!">Run
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="saveMansour();"
+                                        title="Save your program for later usage!">Save
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="downloadMansour();"
+                                        title="download your program that you written!">Download
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="newFile();"
+                                        title="create New File For writing program!">New File
+                                </button>
+                                <label for="verification" style="padding-left: 10px;">
+                                    <input id="verification" name="verification" type="checkBox" checked="checked"
+                                           title="Enable or disable compile-time verification"><span
+                                        style="padding-left: 5px;">Enable Verification</span></input>
+                                </label>
+                                <img id="spinner" src="../images/loading.gif"/>
+                            </section>
+                        </div>
+                        <div class="tab-pane" id="4a">
+                            <div class="code">${CODE}</div>
+                            <section class="toolbar">
+                                <button type="button" class="btn btn-default" onClick="save();"
+                                        title="Create a permalink of this program to share with others.">
+                                    Share
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="compile();"
+                                        title="Compile your program to check it is correct.">
+                                    Compile
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="run();"
+                                        title="Run your program to produce some output!">Run
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="saveMansour();"
+                                        title="Save your program for later usage!">Save
+                                </button>
+                                <button type="button" class="btn btn-default" onClick="downloadMansour();"
+                                        title="download your program that you written!">Download
+                                </button>
+                                <label for="verification" style="padding-left: 10px;">
+                                    <input id="verification" name="verification" type="checkBox" checked="checked"
+                                           title="Enable or disable compile-time verification"><span
+                                        style="padding-left: 5px;">Enable Verification</span></input>
+                                </label>
+                                <img id="spinner" src="../images/loading.gif"/>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div id="messages"></div>
                 <textarea id="console" readonly="readonly"></textarea>
             </div>
@@ -108,31 +259,137 @@
     $(document).ready(function () {
         //Ready >>
 
-        $("a").click(function(){
+        $("a").click(function () {
             $(this).toggleClass("open");
             $("h1").addClass("fade");
         });
 
         var $whileyStyle = $('#whiley-style');
-        $whileyStyle.find('h2 span').click(function() {
+        $whileyStyle.find('h2 span').click(function () {
             $whileyStyle.toggleClass('visible');
         });
 
-        $('ul.colors li').click(function() {
+        $('ul.colors li').click(function () {
             var skin = this.getAttribute("data-skin") + ".css";
-            $('#theme').attr('href','../css/skin/'+ skin);
+            $('#theme').attr('href', '../css/skin/' + skin);
         });
 
 
-        $('#slideBtn').click(function() {
-            $("#options").animate({width:'toggle'},350);
+        $('#slideBtn').click(function () {
+            $("#options").animate({width: 'toggle'}, 350);
         });
 
 
     });
 
 
+    function newFile() {
+        swal({
+            title: 'File Name',
+            input: 'text',
+            showCancelButton: true,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
 
+
+                    value = value.replace(/\s+/g, '-').toLowerCase();
+
+
+                    var pattern = /\.wy\b/;
+                    var result = pattern.exec(value)
+
+                    if (result === null) {
+                        reject('File Name should have Whiley extension (sample.wy) !')
+                    } else if (result[0] === ".wy") {
+                        MakeFile(value);
+                        resolve()
+
+
+
+
+                    } else {
+                        reject('File Name should have Whiley extension (sample.wy) !')
+                    }
+                })
+            }
+        }).then(function (result) {
+            result = result.replace(/\s+/g, '-').toLowerCase();
+            swal({
+                type: 'success',
+                html: 'You entered: ' + result
+            })
+        })
+    }
+
+    function MakeFile(name){
+
+        var fileNames = document.getElementById("fileNames");
+        var nameWithoutWhileyExtension = name.replace('.wy','');
+        var element = '<li><a href="#' + nameWithoutWhileyExtension + '" data-toggle="tab">' + name + '</a></li>';
+        fileNames.innerHTML = fileNames.innerHTML + element;
+
+        var template = '<div class="tab-pane" id="' + nameWithoutWhileyExtension +'"><div class="code">${CODE}'+ nameWithoutWhileyExtension +'</div> <section class="toolbar"><button type="button" class="btn btn-default" onClick="save();"title="Create a permalink of this program to share with others.">Share</button><button type="button" class="btn btn-default" onClick="compile();" title="Compile your program to check it is correct."> Compile </button> <button type="button" class="btn btn-default" onClick="run();" title="Run your program to produce some output!">Run </button> <button type="button" class="btn btn-default" onClick="saveMansour();" title="Save your program for later usage!">Save </button> <button type="button" class="btn btn-default" onClick="downloadMansour();"title="download your program that you written!">Download</button><label for="verification" style="padding-left: 10px;"><input id="verification" name="verification" type="checkBox" checked="checked"title="Enable or disable compile-time verification"><span style="padding-left: 5px;">Enable Verification</span></input></label><img id="spinner" src="../images/loading.gif"/></section></div>';
+
+
+        var tabContent = document.getElementById("tab-content-code");
+        tabContent.innerHTML =  tabContent.innerHTML + template;
+        var editors = []; //let's have an array
+        $('.code').each(function(index){
+            editors[index] = ace.edit(this);
+
+            var WhileyMode = require("ace/mode/whiley").Mode;
+            editors[index].getSession().setMode(new WhileyMode());
+            editors[index].setTheme("ace/theme/eclipse");
+            editors[index].setFontSize("10pt");
+            editors[index].setBehavioursEnabled(false);
+            editors[index].setHighlightActiveLine(false);
+            editors[index].setShowFoldWidgets(false);
+            editors[index].setShowPrintMargin(false);
+            editors[index].getSession().setUseSoftTabs(true);
+            editors[index].getSession().setTabSize(4);
+            editors[index].markers = [];
+
+        });
+
+    }
+    var editors = []; //let's have an array
+    $('.code').each(function(index){
+        editors[index] = ace.edit(this);
+
+        var WhileyMode = require("ace/mode/whiley").Mode;
+        editors[index].getSession().setMode(new WhileyMode());
+        editors[index].setTheme("ace/theme/eclipse");
+        editors[index].setFontSize("10pt");
+        editors[index].setBehavioursEnabled(false);
+        editors[index].setHighlightActiveLine(false);
+        editors[index].setShowFoldWidgets(false);
+        editors[index].setShowPrintMargin(false);
+        editors[index].getSession().setUseSoftTabs(true);
+        editors[index].getSession().setTabSize(4);
+        editors[index].markers = [];
+
+    });
+
+    /*
+     setInterval(function(){
+     console.log(window.location.href);}, 300);*/
 </script>
+<style>
+
+    /* change border radius for the tab , apply corners on top*/
+
+    #exTab3 .nav-pills > li > a {
+        border-radius: 4px 4px 0 0;
+    }
+
+    #exTab3 .tab-content {
+        /*color: white;
+        background-color: #337ab7;
+        padding: 5px 15px;*/
+        width: 86%;
+    }
+
+</style>
+
 </body>
 </html>
